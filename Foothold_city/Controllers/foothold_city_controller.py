@@ -1,4 +1,4 @@
-class ControllerFootholdCity:
+class FootholdCityController:
     """Контроллер для обработки событий"""
 
     def __init__(self, view):
