@@ -18,6 +18,8 @@ class Ui_FootholdCity(object):
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName("gridLayout")
         self.graphicsView = QtWidgets.QGraphicsView(parent=self.centralwidget)
+        self.graphicsView.setMinimumSize(700, 500)  # Set a minimum size for the graphicsView
+
         self.graphicsView.setObjectName("graphicsView")
         self.gridLayout.addWidget(self.graphicsView, 0, 0, 1, 1)
         self.pushButton_open = QtWidgets.QPushButton(parent=self.centralwidget)
@@ -32,8 +34,6 @@ class Ui_FootholdCity(object):
         FootholdCity.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(FootholdCity)
-        QtCore.QMetaObject.connectSlotsByName(FootholdCity)
-
     def retranslateUi(self, FootholdCity):
         _translate = QtCore.QCoreApplication.translate
         FootholdCity.setWindowTitle(_translate("FootholdCity", "Опорный город"))
