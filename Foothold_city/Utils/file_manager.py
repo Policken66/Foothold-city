@@ -73,3 +73,21 @@ class FileManager:
                 return city_data.to_dict(orient='records')[0]
         print(f"Город '{city_name}' не найден в данных.")
         return None
+
+    def normalize_data(self):
+        """
+        Нормализует данные для каждого города.
+        :return: DataFrame с нормализованными данными.
+        """
+        if self.data is not None:
+            # Нормализация столбцов
+            for column in ['Площадь', 'Население', 'Расстояние до крупнейщей агломерации']:
+                min_val = self.data[column].min()
+                max_val = self.data[column].max()
+                self.data[f"{column}_норм"] = ((self.data[column] - min_val) / (max_val - min_val) * 100).round(2)
+
+            # Возвращаем новый DataFrame с нормализованными данными
+            return self.data[['Город', 'Площадь_норм', 'Население_норм', 'Расстояние до крупнейщей агломерации_норм']]
+        else:
+            print("Данные не загружены.")
+            return None

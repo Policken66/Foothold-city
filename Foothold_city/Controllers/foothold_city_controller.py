@@ -1,7 +1,10 @@
-from PyQt6.QtWidgets import QFileDialog, QGraphicsScene, QSizePolicy
+import numpy as np
+from PyQt6.QtWidgets import QFileDialog, QGraphicsScene, QSizePolicy, QWidget, QVBoxLayout
+from matplotlib import pyplot as plt
 
 from Foothold_city.Utils.file_manager import FileManager
 from Foothold_city.Views.foothold_city_view import FootholdCityView
+from Foothold_city.Views.radial_graphics import RadialGraphics
 from Foothold_city.Views.visualization import VisualizationWidget
 
 
@@ -23,11 +26,13 @@ class FootholdCityController:
         # Подключение сигнала выбора элемента в QListWidget
         self.view.ui.listWidget.itemClicked.connect(self.listWidget_itemClicked)
 
-        self.init_diagram()
+
 
         # Переменные
         self.visualization = None
-
+        self.normalized_data = None
+        self.radial_graphics = None
+        self.radial_graphics = None
 
     def pushButton_open_clicked(self):
         """Обработчик нажатия кнопки 'Open'."""
@@ -45,6 +50,8 @@ class FootholdCityController:
             print(f"Выбран файл: {file_path}")
             self.file_manager.load_excel(file_path)  # Загружаем данные в модель
             cities = self.file_manager.get_city_names()  # Получаем список городов
+            # Нормализуем данные
+            self.normalized_data = self.file_manager.normalize_data()
             print(cities)
             if cities:
                 self.view.ui.listWidget.clear()  # Очищаем список городов
@@ -52,14 +59,23 @@ class FootholdCityController:
 
     def pushButton_save_clicked(self):
         print("Button save clicked")
+        self.init_diagram()
 
     def listWidget_itemClicked(self, item):
         """Обработчик выбора элемента в QListWidget."""
-        print(item.text())
+        city_name = item.text()
+        city_data = self.normalized_data[self.normalized_data['Город'] == city_name].to_dict(orient='records')[0]
+        self.radial_graphics = RadialGraphics()
+        self.radial_graphics.draw_radial_chart(city_data, city_name)
+        self.view.ui.graphicsView.setScene(QGraphicsScene(self.view))  # Create a new QGraphicsScene
+        self.view.ui.graphicsView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.view.ui.graphicsView.scene().addWidget(self.radial_graphics)  # Add the VisualizationWidget to the scene
 
     def init_diagram(self):
         # Создаем и добавляем виджет визуализации
         self.visualization = VisualizationWidget()
+        self.visualization.setup_quadrants()
         self.view.ui.graphicsView.setScene(QGraphicsScene(self.view))  # Create a new QGraphicsScene
         self.view.ui.graphicsView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.view.ui.graphicsView.scene().addWidget(self.visualization)  # Add the VisualizationWidget to the scene
+
