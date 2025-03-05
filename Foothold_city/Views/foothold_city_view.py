@@ -12,11 +12,6 @@ class FootholdCityView(QMainWindow):
 
         # Добавляем стили к QListWidget
         self.style_for_QListWidget()
-        # Создаем и добавляем виджет визуализации
-        self.visualization = VisualizationWidget()
-        self.ui.graphicsView.setScene(QGraphicsScene(self))  # Create a new QGraphicsScene
-        self.ui.graphicsView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.ui.graphicsView.scene().addWidget(self.visualization)  # Add the VisualizationWidget to the scene
 
     def style_for_QListWidget(self):
         style = ("""

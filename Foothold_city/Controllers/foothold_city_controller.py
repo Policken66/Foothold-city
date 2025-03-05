@@ -1,7 +1,8 @@
-from PyQt6.QtWidgets import QFileDialog
+from PyQt6.QtWidgets import QFileDialog, QGraphicsScene, QSizePolicy
 
 from Foothold_city.Utils.file_manager import FileManager
 from Foothold_city.Views.foothold_city_view import FootholdCityView
+from Foothold_city.Views.visualization import VisualizationWidget
 
 
 class FootholdCityController:
@@ -21,6 +22,12 @@ class FootholdCityController:
 
         # Подключение сигнала выбора элемента в QListWidget
         self.view.ui.listWidget.itemClicked.connect(self.listWidget_itemClicked)
+
+        self.init_diagram()
+
+        # Переменные
+        self.visualization = None
+
 
     def pushButton_open_clicked(self):
         """Обработчик нажатия кнопки 'Open'."""
@@ -49,3 +56,10 @@ class FootholdCityController:
     def listWidget_itemClicked(self, item):
         """Обработчик выбора элемента в QListWidget."""
         print(item.text())
+
+    def init_diagram(self):
+        # Создаем и добавляем виджет визуализации
+        self.visualization = VisualizationWidget()
+        self.view.ui.graphicsView.setScene(QGraphicsScene(self.view))  # Create a new QGraphicsScene
+        self.view.ui.graphicsView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.view.ui.graphicsView.scene().addWidget(self.visualization)  # Add the VisualizationWidget to the scene
