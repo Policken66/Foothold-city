@@ -2,11 +2,14 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 import numpy as np
+from matplotlib.figure import Figure
+
 
 class VisualizationWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.figure, self.ax = plt.subplots(figsize=(8, 8))
+        # self.figure = Figure()
         self.canvas = FigureCanvas(self.figure)
         self.setup_quadrants()
         layout = QVBoxLayout(self)
@@ -96,4 +99,23 @@ class VisualizationWidget(QWidget):
         self.ax.set_yticks([])
         
         # Обновляем график
+        self.canvas.draw()
+
+    def draw_radar_chart(self, city_data, city_name):
+        """Рисует радиальную диаграмму."""
+        self.figure.clear()
+        ax = self.figure.add_subplot(111, polar=True)
+
+        labels = ['Площадь', 'Население', 'Расстояние']
+        values = [city_data['Площадь_норм'], city_data['Население_норм'], city_data['Расстояние_норм']]
+        angles = np.linspace(0, 2 * np.pi, len(labels), endpoint=False).tolist()
+        values += values[:1]
+        angles += angles[:1]
+
+        ax.plot(angles, values, color='blue', linewidth=2)
+        ax.fill(angles, values, color='blue', alpha=0.25)
+        ax.set_xticks(angles[:-1])
+        ax.set_xticklabels(labels)
+        ax.set_title(f"Город: {city_name}")
+
         self.canvas.draw()
