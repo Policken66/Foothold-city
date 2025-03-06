@@ -14,7 +14,51 @@ class VisualizationWidget(QWidget):
         self.setLayout(layout)
 
     def setup_quadrants(self):
-        # Очищаем график
+        """   """
+        origin = np.array([0, 0])
+
+        # Определяем 4 вектора
+        vectors = np.array([
+            [2, 3],  # Вектор 1
+            [4, 1],  # Вектор 2
+            [-3, 2], # Вектор 3
+            [1, -2]  # Вектор 4
+        ])
+
+        # Вычисляем углы каждого вектора относительно оси X
+        angles = np.arctan2(vectors[:, 1], vectors[:, 0])
+
+        # Сортируем векторы по углу (чтобы обойти их против часовой стрелки)
+        sorted_indices = np.argsort(angles)
+        vectors = vectors[sorted_indices]
+
+        # Разделяем координаты концов векторов
+        U, V = vectors[:, 0], vectors[:, 1]
+
+        # Дублируем начальную точку (ноль) для всех векторов
+        X = np.full(len(vectors), origin[0])
+        Y = np.full(len(vectors), origin[1])
+
+        # Рисуем векторы
+        plt.quiver(X, Y, U, V, angles='xy', scale_units='xy', scale=1, color=['r', 'b', 'g', 'm'], width=0.005)
+
+        # Отмечаем начала и концы векторов
+        plt.scatter(origin[0], origin[1], color='black', label="Начало координат")
+        plt.scatter(U, V, color=['red', 'blue', 'green', 'magenta'], label="Концы векторов")
+
+        # Соединяем конечные точки векторов в порядке против часовой стрелки и заполняем многоугольник
+        plt.fill(U, V, color='cyan', alpha=0.3, label="Заштрихованный многоугольник")  # alpha=0.3 делает заливку прозрачной
+
+        # Оформление графика
+        plt.xlim(-4, 5)
+        plt.ylim(-3, 4)
+        plt.axhline(0, color='gray', linewidth=0.5)
+        plt.axvline(0, color='gray', linewidth=0.5)
+        plt.grid()
+        plt.legend()
+        plt.show()
+        
+        """#Очищаем график
         self.ax.clear()
         
         # Устанавливаем границы графика
@@ -96,4 +140,5 @@ class VisualizationWidget(QWidget):
         self.ax.set_yticks([])
         
         # Обновляем график
-        self.canvas.draw()
+        self.canvas.draw()"""       
+       
