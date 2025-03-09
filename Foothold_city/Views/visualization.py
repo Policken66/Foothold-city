@@ -1,144 +1,126 @@
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.patches import FancyArrowPatch
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 import numpy as np
 
 class VisualizationWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.figure, self.ax = plt.subplots(figsize=(8, 8))
+        self.figure, self.ax = plt.subplots(figsize=(6, 6))
         self.canvas = FigureCanvas(self.figure)
-        self.setup_quadrants()
+        
         layout = QVBoxLayout(self)
-        layout.addWidget(self.canvas)  # Add the canvas to the layout
+        layout.addWidget(self.canvas)
         self.setLayout(layout)
 
+        # Определяем оси в каждой сфере
+        self.spheres = {
+            "Политическая": ["Население", "Избирательная кампания"],
+            "Экономическая": ["Связи с городами", "Предприятия"],
+            "Социальная": ["Коэффициент рождаемости", "Качество городской среды", "IQ города"],
+            "Духовная": ["Объекты наследия", "Религиозные конфессии"]
+        }
+        
+        self.setup_quadrants()
+    
+    """делим на 4 квадранта"""
     def setup_quadrants(self):
-        """   """
-        origin = np.array([0, 0])
-
-        # Определяем 4 вектора
-        vectors = np.array([
-            [2, 3],  # Вектор 1
-            [4, 1],  # Вектор 2
-            [-3, 2], # Вектор 3
-            [1, -2]  # Вектор 4
-        ])
-
-        # Вычисляем углы каждого вектора относительно оси X
-        angles = np.arctan2(vectors[:, 1], vectors[:, 0])
-
-        # Сортируем векторы по углу (чтобы обойти их против часовой стрелки)
-        sorted_indices = np.argsort(angles)
-        vectors = vectors[sorted_indices]
-
-        # Разделяем координаты концов векторов
-        U, V = vectors[:, 0], vectors[:, 1]
-
-        # Дублируем начальную точку (ноль) для всех векторов
-        X = np.full(len(vectors), origin[0])
-        Y = np.full(len(vectors), origin[1])
-
-        # Рисуем векторы
-        plt.quiver(X, Y, U, V, angles='xy', scale_units='xy', scale=1, color=['r', 'b', 'g', 'm'], width=0.005)
-
-        # Отмечаем начала и концы векторов
-        plt.scatter(origin[0], origin[1], color='black', label="Начало координат")
-        plt.scatter(U, V, color=['red', 'blue', 'green', 'magenta'], label="Концы векторов")
-
-        # Соединяем конечные точки векторов в порядке против часовой стрелки и заполняем многоугольник
-        plt.fill(U, V, color='cyan', alpha=0.3, label="Заштрихованный многоугольник")  # alpha=0.3 делает заливку прозрачной
-
-        # Оформление графика
-        plt.xlim(-4, 5)
-        plt.ylim(-3, 4)
-        plt.axhline(0, color='gray', linewidth=0.5)
-        plt.axvline(0, color='gray', linewidth=0.5)
-        plt.grid()
-        plt.legend()
-        plt.show()
-        
-        """#Очищаем график
         self.ax.clear()
-        
-        # Устанавливаем границы графика
         self.ax.set_xlim(-10, 10)
         self.ax.set_ylim(-10, 10)
         
-        # Рисуем оси координат
+        # Разделение на 4 части
         self.ax.axhline(y=0, color='gray', linewidth=1, linestyle='--')
         self.ax.axvline(x=0, color='gray', linewidth=1, linestyle='--')
         
-        # Добавляем подписи для каждой четверти
-        self.ax.text(5, 5, 'Политическая сфера',                
-                    horizontalalignment='center', 
-                    verticalalignment='center')
-        self.ax.text(-5, 5, 'Экономическая сфера', 
-                    horizontalalignment='center', 
-                    verticalalignment='center')
-        self.ax.text(-5, -5, 'Социальная сфера', 
-                    horizontalalignment='center', 
-                    verticalalignment='center')
-        self.ax.text(5, -5, 'Духовная сфера', 
-                    horizontalalignment='center', 
-                    verticalalignment='center')
+        # Подписи к сферам
+        self.ax.text(5, 5, 'Политическая сфера', ha='center', va='center', fontsize=16, color='gray')
+        self.ax.text(-5, 5, 'Экономическая сфера', ha='center', va='center', fontsize=16, color='gray')
+        self.ax.text(-5, -5, 'Социальная сфера', ha='center', va='center', fontsize=16, color='gray')
+        self.ax.text(5, -5, 'Духовная сфера', ha='center', va='center', fontsize=16, color='gray')
         
-        # Добавляем векторы для политической сферы
-        num_political_vectors = 2
-        political_angles = [0, 90]  # Angles for political vectors
-        for angle in political_angles:
-            x = 2 * np.cos(np.radians(angle))
-            y = 2 * np.sin(np.radians(angle))
-            self.ax.quiver(0, 0, x, y, angles='xy', scale_units='xy', scale=1, color='blue' if angle == 0 else 'red')
-            label = 'Население' if angle == 0 else 'Избирательная кампания'
-            self.ax.text(x, y, label, color='blue' if angle == 0 else 'red', fontsize=10, ha='center', va='bottom', rotation=angle)
+        self.plot_axes()
+    
+    """отрисовка матрицы опорных городов"""
+    def plot_axes(self):
+        sphere_angles = {
+            "Политическая": (np.pi/12, 5*np.pi/12),    # 15°–75°
+            "Экономическая": (7*np.pi/12, 11*np.pi/12), # 105°–165°
+            "Социальная": (13*np.pi/12, 17*np.pi/12),   # 195°–255°
+            "Духовная": (19*np.pi/12, 23*np.pi/12)      # 285°–345°
+        }
 
+        axis_positions = {}
+        text_offset = 1.5  # Увеличенный отступ для текста
+
+        for sphere, axes in self.spheres.items():
+            start_angle, end_angle = sphere_angles[sphere]
+            count = len(axes)
+            total_span = end_angle - start_angle
+            step = total_span / (count + 1)
+            
+            for i, axis in enumerate(axes):
+                angle = start_angle + step * (i + 1)
+                x = 7 * np.cos(angle)
+                y = 7 * np.sin(angle)
+                axis_positions[axis] = (x, y)
+                
+                # Создание пунктирной оси со стрелкой
+                arrow = FancyArrowPatch(
+                    (0, 0), (x, y),
+                    arrowstyle='->',           # Стрелка на конце
+                    linestyle='dashed',        # Пунктирная линия
+                    color='blue',
+                    mutation_scale=15,         # Размер стрелки
+                    linewidth=2,
+                    zorder=1                  # Чтобы линия была под текстом
+                )
+                self.ax.add_patch(arrow)
+                
+                # Определение позиции текста
+                angle_deg = np.degrees(angle) % 360
+                ha, va, text_x, text_y = self.get_text_position(angle_deg, x, y, text_offset)
+                
+                # Добавление текста
+                self.ax.text(
+                    text_x, text_y, axis,
+                    fontsize=10,
+                    ha=ha,
+                    va=va,
+                    bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='none', alpha=0.9)
+                )
         
-        # Добавляем векторы для социальной сферы
-        num_social_vectors = 3
-        social_angles = [0, 120, 240]  # Angles for social vectors
-        for angle in social_angles:
-            x = 2 * np.cos(np.radians(angle))
-            y = 2 * np.sin(np.radians(angle))
-            color = 'green' if angle == 0 else 'orange' if angle == 120 else 'purple'
-            label = 'Коэффициент рождаемости' if angle == 0 else 'IQ города' if angle == 120 else 'Качество городской среды'
-            self.ax.quiver(0, 0, x, y, angles='xy', scale_units='xy', scale=1, color=color)
-            self.ax.text(x, y, label, color=color, fontsize=10, ha='center', va='bottom', rotation=angle)
+        # Отрисовка многоугольника и точек
+        points = np.array(list(axis_positions.values()))
+        sorted_indices = np.argsort(np.arctan2(points[:, 1], points[:, 0]))
+        points = points[sorted_indices]
+        X, Y = points[:, 0], points[:, 1]
+        
+        self.ax.fill(X, Y, color='cyan', alpha=0.3)
+        self.ax.plot(np.append(X, X[0]), np.append(Y, Y[0]), 'k-')
+        self.ax.scatter(X, Y, color='red')
 
-
-        # Добавляем векторы для экономической сферы
-        num_economic_vectors = 2
-        economic_angles = [0, 90]  # Angles for economic vectors
-        for angle in economic_angles:
-            x = 2 * np.cos(np.radians(angle))
-            y = 2 * np.sin(np.radians(angle))
-            color = 'purple' if angle == 0 else 'brown'
-            label = 'Связи с городами' if angle == 0 else 'Предприятия'
-            self.ax.quiver(0, 0, x, y, angles='xy', scale_units='xy', scale=1, color=color)
-
-            self.ax.text(-5 + x, y, label, color=color, fontsize=10, ha='center', va='bottom', rotation=angle)
-
-
-        # Добавляем векторы для духовной сферы
-        num_spiritual_vectors = 2
-        spiritual_angles = [0, 90]  # Angles for spiritual vectors
-        for angle in spiritual_angles:
-            x = 2 * np.cos(np.radians(angle))
-            y = 2 * np.sin(np.radians(angle))
-            color = 'cyan' if angle == 0 else 'magenta'
-            label = 'Объекты культурного наследия' if angle == 0 else 'Религиозные конфессии'
-            self.ax.quiver(0, 0, x, y, angles='xy', scale_units='xy', scale=1, color=color)
-
-            self.ax.text(5 + x, y, label, color=color, fontsize=10, ha='center', va='bottom', rotation=angle)
-
-
-        # Убираем оси и рамки
+        # Скрытие стандартных осей
         for spine in self.ax.spines.values():
             spine.set_visible(False)
-
         self.ax.set_xticks([])
         self.ax.set_yticks([])
         
-        # Обновляем график
-        self.canvas.draw()"""       
-       
+        self.canvas.draw()
+        plt.show()
+
+    def get_text_position(self, angle, x, y, offset):
+        """Определение позиции и выравнивания текста в зависимости от угла"""
+        if 0 <= angle < 45 or 315 <= angle < 360:
+            return ('left', 'center', x + offset, y)
+        elif 45 <= angle < 135:
+            return ('center', 'bottom', x, y + offset)
+        elif 135 <= angle < 225:
+            return ('right', 'center', x - offset, y)
+        else:  # 225 <= angle < 315
+            return ('center', 'top', x, y - offset)
+        
+    def update_graph(self, new_spheres):
+        self.spheres = new_spheres
+        self.setup_quadrants()
