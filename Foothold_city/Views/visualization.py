@@ -1,6 +1,6 @@
+from matplotlib.patches import FancyArrowPatch
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.patches import FancyArrowPatch
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 import numpy as np
 
@@ -14,17 +14,16 @@ class VisualizationWidget(QWidget):
         layout.addWidget(self.canvas)
         self.setLayout(layout)
 
-        # Определяем оси в каждой сфере
         self.spheres = {
-            "Политическая": ["Население", "Избирательная кампания"],
-            "Экономическая": ["Связи с городами", "Предприятия"],
-            "Социальная": ["Коэффициент рождаемости", "Качество городской среды", "IQ города"],
-            "Духовная": ["Объекты наследия", "Религиозные конфессии"]
+            "Политическая": [("Население", 8), ("Избирательная кампания", 3)],
+            "Экономическая": [("Связи с городами", 4), ("Предприятия", 6)],
+            "Социальная": [("Коэффициент рождаемости", 10), ("Качество городской среды", 4), ("IQ города", 7)], 
+            "Духовная": [("Объекты наследия", 5), ("Религиозные конфессии", 3)]
         }
         
         self.setup_quadrants()
     
-    """делим на 4 квадранта"""
+    """делим на 4 сферы"""
     def setup_quadrants(self):
         self.ax.clear()
         self.ax.set_xlim(-10, 10)
@@ -42,7 +41,6 @@ class VisualizationWidget(QWidget):
         
         self.plot_axes()
     
-    """отрисовка матрицы опорных городов"""
     def plot_axes(self):
         sphere_angles = {
             "Политическая": (np.pi/12, 5*np.pi/12),    # 15°–75°
@@ -51,55 +49,73 @@ class VisualizationWidget(QWidget):
             "Духовная": (19*np.pi/12, 23*np.pi/12)      # 285°–345°
         }
 
-        axis_positions = {}
-        text_offset = 1.5  # Увеличенный отступ для текста
-
+        points = []  # Для хранения координат точек критериев
+        
         for sphere, axes in self.spheres.items():
             start_angle, end_angle = sphere_angles[sphere]
             count = len(axes)
             total_span = end_angle - start_angle
-            step = total_span / (count + 1)
+            step = total_span / (count + 1) if count > 1 else total_span / 2
             
-            for i, axis in enumerate(axes):
+            for i, (axis_name, value) in enumerate(axes):
                 angle = start_angle + step * (i + 1)
-                x = 7 * np.cos(angle)
-                y = 7 * np.sin(angle)
-                axis_positions[axis] = (x, y)
+                max_length = 9  # Максимальная длина оси
                 
-                # Создание пунктирной оси со стрелкой
+                # Координаты конца оси
+                x_end = max_length * np.cos(angle)
+                y_end = max_length * np.sin(angle)
+                
+                # Координаты точки критерия (пропорционально значению)
+                x = (value / max_length) * x_end
+                y = (value / max_length) * y_end
+                points.append((x, y))
+                
+                # Рисуем ось со стрелкой
                 arrow = FancyArrowPatch(
-                    (0, 0), (x, y),
-                    arrowstyle='->',           # Стрелка на конце
-                    linestyle='dashed',        # Пунктирная линия
+                    (0, 0), (x_end, y_end),
+                    arrowstyle='->',
+                    linestyle='dashed',
                     color='blue',
-                    mutation_scale=15,         # Размер стрелки
-                    linewidth=2,
-                    zorder=1                  # Чтобы линия была под текстом
+                    mutation_scale=15,
+                    linewidth=1,
+                    zorder=1
                 )
                 self.ax.add_patch(arrow)
                 
-                # Определение позиции текста
+                # Определение позиции текста оси
                 angle_deg = np.degrees(angle) % 360
-                ha, va, text_x, text_y = self.get_text_position(angle_deg, x, y, text_offset)
+                ha, va, text_x, text_y = self.get_text_position(
+                    angle_deg, x_end, y_end, offset=1.5
+                )
                 
-                # Добавление текста
+                # Подпись оси
                 self.ax.text(
-                    text_x, text_y, axis,
+                    text_x, text_y, axis_name,
                     fontsize=10,
                     ha=ha,
                     va=va,
                     bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='none', alpha=0.9)
                 )
-        
-        # Отрисовка многоугольника и точек
-        points = np.array(list(axis_positions.values()))
-        sorted_indices = np.argsort(np.arctan2(points[:, 1], points[:, 0]))
-        points = points[sorted_indices]
-        X, Y = points[:, 0], points[:, 1]
-        
-        self.ax.fill(X, Y, color='cyan', alpha=0.3)
-        self.ax.plot(np.append(X, X[0]), np.append(Y, Y[0]), 'k-')
-        self.ax.scatter(X, Y, color='red')
+                
+                # Подпись значения и точка на оси
+                self.ax.scatter(x, y, color='red', zorder=3)
+                self.ax.text(
+                    x * 1.1, y * 1.1, f"{value}",
+                    fontsize=8,
+                    ha='center',
+                    va='center',
+                    color='darkred'
+                )
+
+        # Отрисовка многоугольника
+        if len(points) >= 3:
+            points = np.array(points)
+            sorted_indices = np.argsort(np.arctan2(points[:, 1], points[:, 0]))
+            points = points[sorted_indices]
+            X, Y = points[:, 0], points[:, 1]
+            
+            self.ax.fill(X, Y, color='cyan', alpha=0.3)
+            self.ax.plot(np.append(X, X[0]), np.append(Y, Y[0]), 'k-', linewidth=2)
 
         # Скрытие стандартных осей
         for spine in self.ax.spines.values():
@@ -109,18 +125,19 @@ class VisualizationWidget(QWidget):
         
         self.canvas.draw()
         plt.show()
-
+    
     def get_text_position(self, angle, x, y, offset):
-        """Определение позиции и выравнивания текста в зависимости от угла"""
+        """Определение позиции подписи оси"""
         if 0 <= angle < 45 or 315 <= angle < 360:
             return ('left', 'center', x + offset, y)
         elif 45 <= angle < 135:
             return ('center', 'bottom', x, y + offset)
         elif 135 <= angle < 225:
             return ('right', 'center', x - offset, y)
-        else:  # 225 <= angle < 315
+        else:
             return ('center', 'top', x, y - offset)
-        
+    
     def update_graph(self, new_spheres):
+        """Обновление данных и перерисовка"""
         self.spheres = new_spheres
         self.setup_quadrants()
