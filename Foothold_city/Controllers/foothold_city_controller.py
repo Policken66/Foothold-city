@@ -30,7 +30,6 @@ class FootholdCityController:
         self.visualization = None
         self.normalized_data = None
         self.radial_graphics = None
-        self.radial_graphics = None
         self.example_data = {
             "Политическая": [("Население", 8), ("Избирательная кампания", 3)],
             "Экономическая": [("Связи с городами", 4), ("Предприятия", 6)],
@@ -67,18 +66,68 @@ class FootholdCityController:
 
     def listWidget_itemClicked(self, item):
         """Обработчик выбора элемента в QListWidget."""
+        # city_name = item.text()
+        # city_data = self.normalized_data[self.normalized_data['Город'] == city_name].to_dict(orient='records')[0]
+        # self.radial_graphics = RadialGraphics()
+        # self.radial_graphics.draw_radial_chart(city_data, city_name)
+        # self.view.ui.graphicsView.setScene(QGraphicsScene(self.view))  # Create a new QGraphicsScene
+        # self.view.ui.graphicsView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        # self.view.ui.graphicsView.scene().addWidget(self.radial_graphics)  # Add the VisualizationWidget to the scene
+
         city_name = item.text()
-        city_data = self.normalized_data[self.normalized_data['Город'] == city_name].to_dict(orient='records')[0]
-        self.radial_graphics = RadialGraphics()
-        self.radial_graphics.draw_radial_chart(city_data, city_name)
+        # Получаем данные для выбранного города
+        city_spheres_data = self.get_city_spheres_data(city_name)
+
+        # Создаем и отображаем визуализацию
+        self.visualization = VisualizationWidget()
+        self.visualization.spheres = city_spheres_data
         self.view.ui.graphicsView.setScene(QGraphicsScene(self.view))  # Create a new QGraphicsScene
         self.view.ui.graphicsView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.view.ui.graphicsView.scene().addWidget(self.radial_graphics)  # Add the VisualizationWidget to the scene
+        self.view.ui.graphicsView.scene().addWidget(self.visualization)
+
+    def get_city_spheres_data(self, city_name):
+        """
+        Возвращает данные для конкретного города в требуемом формате.
+
+        :param city_name: Название города.
+        :return: Словарь сфер с данными для города.
+        """
+        if self.normalized_data is None:
+            print("Нормализованные данные не загружены.")
+            return {}
+        print(self.normalized_data)
+
+        # Определение сфер и критериев
+        spheres_mapping = {
+            "Политическая": ["Население", "Избирательная компания"],
+            "Экономическая": ["Связи с городами", "Предприятия"],
+            "Социальная": ["Коэффициент рождаемости", "Качество городской среды", "IQ города"],
+            "Духовная": ["Объекты населения", "Религиозные конфессии"]
+        }
+
+        # Фильтруем данные для указанного города
+        city_data = self.normalized_data[self.normalized_data['Город'] == city_name]
+        if city_data.empty:
+            print(f"Город '{city_name}' не найден в данных.")
+            return {}
+
+        # Формируем словарь сфер
+        city_spheres_data = {}
+        for sphere, criteria in spheres_mapping.items():
+            sphere_data = []
+            for criterion in criteria:
+                norm_column = f"{criterion}_норм"
+                if norm_column in city_data.columns:
+                    value = city_data[norm_column].values[0]  # Берем значение для города
+                    sphere_data.append((criterion, value))
+            city_spheres_data[sphere] = sphere_data
+
+        return city_spheres_data
 
     def init_diagram(self):
-        # Создаем и добавляем виджет визуализации
-        self.visualization = VisualizationWidget()
-        self.visualization.spheres = self.example_data
-        self.view.ui.graphicsView.setScene(QGraphicsScene(self.view))  # Create a new QGraphicsScene
-        self.view.ui.graphicsView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.view.ui.graphicsView.scene().addWidget(self.visualization)  # Add the VisualizationWidget to the scene
+            # Создаем и добавляем виджет визуализации
+            self.visualization = VisualizationWidget()
+            self.visualization.spheres = self.example_data
+            self.view.ui.graphicsView.setScene(QGraphicsScene(self.view))  # Create a new QGraphicsScene
+            self.view.ui.graphicsView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+            self.view.ui.graphicsView.scene().addWidget(self.visualization)  # Add the VisualizationWidget to the scene

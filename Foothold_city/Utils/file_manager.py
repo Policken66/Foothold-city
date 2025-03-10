@@ -79,15 +79,25 @@ class FileManager:
         Нормализует данные для каждого города.
         :return: DataFrame с нормализованными данными.
         """
-        if self.data is not None:
-            # Нормализация столбцов
-            for column in ['Площадь', 'Население', 'Расстояние до крупнейщей агломерации']:
-                min_val = self.data[column].min()
-                max_val = self.data[column].max()
-                self.data[f"{column}_норм"] = ((self.data[column] - min_val) / (max_val - min_val) * 100).round(2)
+        if self.data is not None and 'Город' in self.data.columns:
+            # Создаем новый DataFrame для нормализованных данных
+            normalized_data = self.data.copy()
 
-            # Возвращаем новый DataFrame с нормализованными данными
-            return self.data[['Город', 'Площадь_норм', 'Население_норм', 'Расстояние до крупнейщей агломерации_норм']]
+            # Проходим по всем числовым столбцам, кроме "Город"
+            for column in normalized_data.columns:
+                if column != 'Город' and pd.api.types.is_numeric_dtype(normalized_data[column]):
+                    min_val = normalized_data[column].min()
+                    max_val = normalized_data[column].max()
+                    if max_val > min_val:  # Избегаем деления на ноль
+                        normalized_data[f"{column}_норм"] = (
+                            ((normalized_data[column] - min_val) / (max_val - min_val)) * 10
+                        ).round(2)
+                    else:
+                        normalized_data[f"{column}_норм"] = 0  # Если все значения одинаковы
+
+            # Возвращаем только столбцы с нормализованными данными
+            normalized_columns = [col for col in normalized_data.columns if col.endswith('_норм')]
+            return normalized_data[['Город'] + normalized_columns]
         else:
-            print("Данные не загружены.")
+            print("Данные не загружены или столбец 'Город' отсутствует.")
             return None

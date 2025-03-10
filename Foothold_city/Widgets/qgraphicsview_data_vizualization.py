@@ -39,17 +39,6 @@ class QGraphicsViewDataVisualization(QGraphicsView):
 
         event.accept()
 
-    def mousePressEvent(self, event: QMouseEvent) -> None:
-        if event.button() == Qt.MouseButton.RightButton:
-            # Начало панорамирования
-            self.is_panning = True
-            self.pan_start = self.mapToScene(event.position().toPoint())
-            self.last_mouse_pos = event.position()
-            self.setCursor(Qt.CursorShape.ClosedHandCursor)
-            event.accept()
-        else:
-            super().mousePressEvent(event)
-
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
         if self.is_panning:
             # Вычисляем смещение
