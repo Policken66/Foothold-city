@@ -7,6 +7,7 @@
 
 
 from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtWidgets import QGraphicsView
 
 
 class Ui_FootholdCity(object):
@@ -17,9 +18,7 @@ class Ui_FootholdCity(object):
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName("gridLayout")
-        self.graphicsView = QtWidgets.QGraphicsView(parent=self.centralwidget)
-        self.graphicsView.setMinimumSize(700, 500)  # Set a minimum size for the graphicsView
-
+        self.graphicsView = QGraphicsViewDataVisualization(parent=self.centralwidget)
         self.graphicsView.setObjectName("graphicsView")
         self.gridLayout.addWidget(self.graphicsView, 0, 0, 1, 1)
         self.pushButton_open = QtWidgets.QPushButton(parent=self.centralwidget)
@@ -34,8 +33,11 @@ class Ui_FootholdCity(object):
         FootholdCity.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(FootholdCity)
+        QtCore.QMetaObject.connectSlotsByName(FootholdCity)
+
     def retranslateUi(self, FootholdCity):
         _translate = QtCore.QCoreApplication.translate
         FootholdCity.setWindowTitle(_translate("FootholdCity", "Опорный город"))
         self.pushButton_open.setText(_translate("FootholdCity", "Открыть"))
         self.pushButton_save.setText(_translate("FootholdCity", "Сохранить"))
+from Foothold_city.Widgets.qgraphicsview_data_vizualization import QGraphicsViewDataVisualization

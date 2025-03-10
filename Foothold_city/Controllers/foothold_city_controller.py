@@ -26,13 +26,17 @@ class FootholdCityController:
         # Подключение сигнала выбора элемента в QListWidget
         self.view.ui.listWidget.itemClicked.connect(self.listWidget_itemClicked)
 
-
-
         # Переменные
         self.visualization = None
         self.normalized_data = None
         self.radial_graphics = None
         self.radial_graphics = None
+        self.example_data = {
+            "Политическая": [("Население", 8), ("Избирательная кампания", 3)],
+            "Экономическая": [("Связи с городами", 4), ("Предприятия", 6)],
+            "Социальная": [("Коэффициент рождаемости", 10), ("Качество городской среды", 4), ("IQ города", 7)],
+            "Духовная": [("Объекты наследия", 5), ("Религиозные конфессии", 3)]
+        }
 
     def pushButton_open_clicked(self):
         """Обработчик нажатия кнопки 'Open'."""
@@ -74,8 +78,7 @@ class FootholdCityController:
     def init_diagram(self):
         # Создаем и добавляем виджет визуализации
         self.visualization = VisualizationWidget()
-        self.visualization.setup_quadrants()
+        self.visualization.spheres = self.example_data
         self.view.ui.graphicsView.setScene(QGraphicsScene(self.view))  # Create a new QGraphicsScene
         self.view.ui.graphicsView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.view.ui.graphicsView.scene().addWidget(self.visualization)  # Add the VisualizationWidget to the scene
-

@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="QGraphicsView" name="graphicsView"/>
+     <widget class="QGraphicsViewDataVisualization" name="graphicsView"/>
     </item>
     <item row="1" column="0">
      <widget class="QPushButton" name="pushButton_open">
@@ -38,6 +38,13 @@
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QGraphicsViewDataVisualization</class>
+   <extends>QGraphicsView</extends>
+   <header>Foothold_city.Widgets.qgraphicsview_data_vizualization</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
