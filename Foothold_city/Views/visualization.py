@@ -129,7 +129,9 @@ class VisualizationWidget(QWidget):
         self.ax.set_yticks([])
 
         self.canvas.draw()
-        # plt.show()
+        plt.show()
+        plt.close()
+
 
     def get_text_position(self, angle, x, y, offset):
         """Определение позиции подписи оси"""

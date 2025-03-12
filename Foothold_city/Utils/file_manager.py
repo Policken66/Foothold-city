@@ -5,6 +5,12 @@ class FileManager:
     def __init__(self):
         """Инициализация класса для управления файлами."""
         self.data = None  # Переменная для хранения данных из файла
+        self.spheres_mapping = {
+                                    "Политическая": [],
+                                    "Экономическая": [],
+                                    "Социальная": [],
+                                    "Духовная": []
+                                }
 
     def load_excel(self, file_path, sheet_name=0):
         """
@@ -16,6 +22,7 @@ class FileManager:
         """
         try:
             self.data = pd.read_excel(file_path, sheet_name=sheet_name)
+            print(self.data)
             print(f"Файл успешно загружен: {file_path}")
             return self.data
         except FileNotFoundError:
@@ -23,6 +30,8 @@ class FileManager:
         except Exception as e:
             print(f"Ошибка при загрузке файла: {e}")
         return None
+
+
 
     def get_data(self):
         """Возвращает данные из загруженного файла."""
@@ -91,6 +100,86 @@ class FileManager:
                     if max_val > min_val:  # Избегаем деления на ноль
                         normalized_data[f"{column}_норм"] = (
                             ((normalized_data[column] - min_val) / (max_val - min_val)) * 10
+                        ).round(2)
+                    else:
+                        normalized_data[f"{column}_норм"] = 0  # Если все значения одинаковы
+
+            # Возвращаем только столбцы с нормализованными данными
+            normalized_columns = [col for col in normalized_data.columns if col.endswith('_норм')]
+            return normalized_data[['Город'] + normalized_columns]
+        else:
+            print("Данные не загружены или столбец 'Город' отсутствует.")
+            return None
+
+    def load_excel_2(self, file_path, sheet_name=0):
+        """
+        Загружает данные из Excel-файла.
+
+        :param file_path: Путь к файлу Excel.
+        :param sheet_name: Название листа или его индекс (по умолчанию первый лист).
+        :return: DataFrame с данными или None в случае ошибки.
+        """
+        try:
+            df = pd.read_excel(file_path, sheet_name=sheet_name, header=None)
+
+            # Определение соответствия заголовков сферам
+            headers = df.iloc[0]  # Названия заголовков (первая строка)
+            sphere_labels = df.iloc[1]  # Метки сфер (вторая строка)
+            print("______________headers_______________")
+            print(headers)
+            print("______________sphere_labels_______________")
+            print(sphere_labels)
+
+
+            for header, sphere in zip(headers, sphere_labels):
+                if sphere in self.spheres_mapping:
+                    self.spheres_mapping[sphere].append(header)
+            print("______________spheres_mapping_______________")
+            print(self.spheres_mapping)
+            print(f"Файл успешно загружен: {file_path}")
+
+            # Теперь заполняем data
+            # Удаление первых трех строк (служебные строки) и сброс индекса
+            self.data = df.iloc[3:].reset_index(drop=True)
+
+            # Переименование столбцов на основе второй строки
+            self.data.columns = headers
+
+            print("______________data_______________")
+            print(self.data)
+            return self.data
+        except FileNotFoundError:
+            print(f"Ошибка: Файл не найден по пути {file_path}")
+        except Exception as e:
+            print(f"Ошибка при загрузке файла: {e}")
+        return None
+
+    def normalize_data_2(self):
+        """
+        Нормализует данные для каждого города.
+        :return: DataFrame с нормализованными данными.
+        """
+        if self.data is not None and 'Город' in self.data.columns:
+            # Создаем новый DataFrame для нормализованных данных
+            normalized_data = self.data.copy()
+
+            # Преобразуем все столбцы, кроме "Город", в числовой формат
+            for column in normalized_data.columns:
+                if column != 'Город':
+                    normalized_data[column] = pd.to_numeric(normalized_data[column], errors='coerce')
+
+            # Проходим по всем числовым столбцам, кроме "Город"
+            for column in normalized_data.columns:
+                if column != 'Город' and pd.api.types.is_numeric_dtype(normalized_data[column]):
+                    # Удаляем NaN значения для текущего столбца
+                    valid_data = normalized_data[column].dropna()
+
+                    min_val = valid_data.min()
+                    max_val = valid_data.max()
+
+                    if max_val > min_val:  # Избегаем деления на ноль
+                        normalized_data[f"{column}_норм"] = (
+                                ((normalized_data[column] - min_val) / (max_val - min_val)) * 10
                         ).round(2)
                     else:
                         normalized_data[f"{column}_норм"] = 0  # Если все значения одинаковы
