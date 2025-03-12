@@ -1,10 +1,7 @@
-import numpy as np
 from PyQt6.QtWidgets import QFileDialog, QGraphicsScene, QSizePolicy, QWidget, QVBoxLayout
-from matplotlib import pyplot as plt
 
 from Foothold_city.Utils.file_manager import FileManager
 from Foothold_city.Views.foothold_city_view import FootholdCityView
-from Foothold_city.Views.radial_graphics import RadialGraphics
 from Foothold_city.Views.visualization import VisualizationWidget
 
 
@@ -51,11 +48,18 @@ class FootholdCityController:
 
         if file_path:  # Если файл выбран
             print(f"Выбран файл: {file_path}")
-            self.file_manager.load_excel(file_path)  # Загружаем данные в модель
+            self.file_manager.load_excel_2(file_path)  # Загружаем данные в модель
+            # self.file_manager.load_excel(file_path)  # Загружаем данные в модель
             cities = self.file_manager.get_city_names()  # Получаем список городов
-            # Нормализуем данные
-            self.normalized_data = self.file_manager.normalize_data()
+            print("_________cities_________")
             print(cities)
+            # Нормализуем данные
+            # self.normalized_data = self.file_manager.normalize_data()
+            self.normalized_data = self.file_manager.normalize_data_2()
+            print("_________normalized_data_________")
+            print(self.normalized_data)
+
+
             if cities:
                 self.view.ui.listWidget.clear()  # Очищаем список городов
                 self.view.ui.listWidget.addItems(cities)  # Добавляем города в список
@@ -66,24 +70,12 @@ class FootholdCityController:
 
     def listWidget_itemClicked(self, item):
         """Обработчик выбора элемента в QListWidget."""
-        # city_name = item.text()
-        # city_data = self.normalized_data[self.normalized_data['Город'] == city_name].to_dict(orient='records')[0]
-        # self.radial_graphics = RadialGraphics()
-        # self.radial_graphics.draw_radial_chart(city_data, city_name)
-        # self.view.ui.graphicsView.setScene(QGraphicsScene(self.view))  # Create a new QGraphicsScene
-        # self.view.ui.graphicsView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        # self.view.ui.graphicsView.scene().addWidget(self.radial_graphics)  # Add the VisualizationWidget to the scene
 
         city_name = item.text()
         # Получаем данные для выбранного города
         city_spheres_data = self.get_city_spheres_data(city_name)
-
         # Создаем и отображаем визуализацию
-        self.visualization = VisualizationWidget()
-        self.visualization.spheres = city_spheres_data
-        self.view.ui.graphicsView.setScene(QGraphicsScene(self.view))  # Create a new QGraphicsScene
-        self.view.ui.graphicsView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.view.ui.graphicsView.scene().addWidget(self.visualization)
+        self.create_and_visualization(city_spheres_data)
 
     def get_city_spheres_data(self, city_name):
         """
@@ -104,6 +96,7 @@ class FootholdCityController:
             "Социальная": ["Коэффициент рождаемости", "Качество городской среды", "IQ города"],
             "Духовная": ["Объекты населения", "Религиозные конфессии"]
         }
+        spheres_mapping = self.file_manager.spheres_mapping
 
         # Фильтруем данные для указанного города
         city_data = self.normalized_data[self.normalized_data['Город'] == city_name]
@@ -125,9 +118,16 @@ class FootholdCityController:
         return city_spheres_data
 
     def init_diagram(self):
-            # Создаем и добавляем виджет визуализации
-            self.visualization = VisualizationWidget()
-            self.visualization.spheres = self.example_data
-            self.view.ui.graphicsView.setScene(QGraphicsScene(self.view))  # Create a new QGraphicsScene
-            self.view.ui.graphicsView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-            self.view.ui.graphicsView.scene().addWidget(self.visualization)  # Add the VisualizationWidget to the scene
+        # Создаем и добавляем виджет визуализации
+        self.visualization = VisualizationWidget()
+        self.visualization.spheres = self.example_data
+        self.view.ui.graphicsView.setScene(QGraphicsScene(self.view))  # Create a new QGraphicsScene
+        self.view.ui.graphicsView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.view.ui.graphicsView.scene().addWidget(self.visualization)  # Add the VisualizationWidget to the scene
+
+    def create_and_visualization(self, city_spheres_data):
+        self.visualization = VisualizationWidget()
+        self.visualization.spheres = city_spheres_data
+        self.view.ui.graphicsView.setScene(QGraphicsScene(self.view))  # Create a new QGraphicsScene
+        self.view.ui.graphicsView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.view.ui.graphicsView.scene().addWidget(self.visualization)
