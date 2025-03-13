@@ -34,8 +34,8 @@ class VisualizationWidget(QWidget):
     def setup_quadrants(self):
         """Метод разделяет график на 4 сферы"""
         self.ax.clear()
-        self.ax.set_xlim(-10, 10)
-        self.ax.set_ylim(-10, 10)
+        self.ax.set_xlim(-15, 15)
+        self.ax.set_ylim(-15, 15)
 
         # Разделение на 4 части
         self.ax.axhline(y=0, color='gray', linewidth=1, linestyle='--')
@@ -140,7 +140,7 @@ class VisualizationWidget(QWidget):
 
         self.canvas.draw()
         plt.show()
-        #plt.close()
+        plt.close()
 
 
     def get_text_position(self, angle, x, y, offset):
