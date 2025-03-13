@@ -14,6 +14,7 @@ class VisualizationWidget(QWidget):
         self.figure, self.ax = plt.subplots(figsize=(6, 6))
         self.canvas = FigureCanvas(self.figure)
         self._spheres = None
+        self.plt_size =5
 
         layout = QVBoxLayout(self)
         layout.addWidget(self.canvas)
@@ -41,10 +42,10 @@ class VisualizationWidget(QWidget):
         self.ax.axvline(x=0, color='gray', linewidth=1, linestyle='--')
 
         # Подписи к сферам
-        self.ax.text(5, 5, 'Политическая сфера', ha='center', va='center', fontsize=16, color='gray')
-        self.ax.text(-5, 5, 'Экономическая сфера', ha='center', va='center', fontsize=16, color='gray')
-        self.ax.text(-5, -5, 'Социальная сфера', ha='center', va='center', fontsize=16, color='gray')
-        self.ax.text(5, -5, 'Духовная сфера', ha='center', va='center', fontsize=16, color='gray')
+        self.ax.text(self.plt_size, self.plt_size, 'Политическая сфера', ha='center', va='center', fontsize=16, color='gray')
+        self.ax.text(-self.plt_size, self.plt_size, 'Экономическая сфера', ha='center', va='center', fontsize=16, color='gray')
+        self.ax.text(-self.plt_size, -self.plt_size, 'Социальная сфера', ha='center', va='center', fontsize=16, color='gray')
+        self.ax.text(self.plt_size, -self.plt_size, 'Духовная сфера', ha='center', va='center', fontsize=16, color='gray')
 
         self.plot_axes()
 
