@@ -26,9 +26,9 @@
      </widget>
     </item>
     <item row="1" column="1">
-     <widget class="QPushButton" name="pushButton_save">
+     <widget class="QPushButton" name="pushButton_open_plot">
       <property name="text">
-       <string>Сохранить</string>
+       <string>Открыть график</string>
       </property>
      </widget>
     </item>

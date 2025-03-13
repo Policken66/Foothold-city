@@ -15,10 +15,11 @@ class FootholdCityController:
         """
         self.view = view  # Сохраняем ссылку на представление
         self.file_manager = FileManager()
+        self.visualization = VisualizationWidget()
 
         # Подключение сигналов кнопок к соответствующим обработчикам событий
         self.view.ui.pushButton_open.clicked.connect(self.pushButton_open_clicked)
-        self.view.ui.pushButton_save.clicked.connect(self.pushButton_save_clicked)
+        self.view.ui.pushButton_open_plot.clicked.connect(self.pushButton_open_plot_clicked)
 
         # Подключение сигнала выбора элемента в QListWidget
         self.view.ui.listWidget.itemClicked.connect(self.listWidget_itemClicked)
@@ -64,9 +65,9 @@ class FootholdCityController:
                 self.view.ui.listWidget.clear()  # Очищаем список городов
                 self.view.ui.listWidget.addItems(cities)  # Добавляем города в список
 
-    def pushButton_save_clicked(self):
-        print("Button save clicked")
-        self.init_diagram()
+    def pushButton_open_plot_clicked(self):
+        print("Button open plot clicked")
+        self.visualization.plt.show()
 
     def listWidget_itemClicked(self, item):
         """Обработчик выбора элемента в QListWidget."""
@@ -118,15 +119,14 @@ class FootholdCityController:
         return city_spheres_data
 
     def init_diagram(self):
-        # Создаем и добавляем виджет визуализации
-        self.visualization = VisualizationWidget()
+        # Создаем и добавляем виджет визуализации        
         self.visualization.spheres = self.example_data
         self.view.ui.graphicsView.setScene(QGraphicsScene(self.view))  # Create a new QGraphicsScene
         self.view.ui.graphicsView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.view.ui.graphicsView.scene().addWidget(self.visualization)  # Add the VisualizationWidget to the scene
 
     def create_and_visualization(self, city_spheres_data):
-        self.visualization = VisualizationWidget()
+        #self.visualization = VisualizationWidget()
         self.visualization.spheres = city_spheres_data
         self.view.ui.graphicsView.setScene(QGraphicsScene(self.view))  # Create a new QGraphicsScene
         self.view.ui.graphicsView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
