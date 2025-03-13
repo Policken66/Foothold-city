@@ -1,3 +1,5 @@
+import math
+
 from matplotlib.patches import FancyArrowPatch
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
@@ -59,10 +61,17 @@ class VisualizationWidget(QWidget):
         for sphere, axes in self._spheres.items():
             start_angle, end_angle = sphere_angles[sphere]
             count = len(axes)
+            for i, (axis_name, value) in enumerate(axes):
+                if math.isnan(value):
+                    count -= 1
             total_span = end_angle - start_angle
             step = total_span / (count + 1) if count > 1 else total_span / 2
 
             for i, (axis_name, value) in enumerate(axes):
+
+                if math.isnan(value):
+                    continue
+
                 angle = start_angle + step * (i + 1)
                 max_length = 9  # Максимальная длина оси
 
