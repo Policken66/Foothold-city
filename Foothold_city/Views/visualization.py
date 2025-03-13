@@ -74,7 +74,7 @@ class VisualizationWidget(QWidget):
                     continue
 
                 angle = start_angle + step * (i + 1)
-                max_length = 9  # Максимальная длина оси
+                max_length = 10  # Максимальная длина оси
 
                 # Координаты конца оси
                 x_end = max_length * np.cos(angle)
@@ -140,7 +140,7 @@ class VisualizationWidget(QWidget):
 
         self.canvas.draw()
         plt.show()
-        plt.close()
+        #plt.close()
 
 
     def get_text_position(self, angle, x, y, offset):
