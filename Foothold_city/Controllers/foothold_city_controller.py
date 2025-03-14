@@ -129,6 +129,8 @@ class FootholdCityController:
         self.view.ui.graphicsView.scene().addWidget(self.visualization)  # Add the VisualizationWidget to the scene
 
     def create_and_visualization(self, city_spheres_data):
+        if self.visualization is not None:
+            self.visualization.plot.close()
         self.visualization = VisualizationWidget()
         self.visualization.spheres = city_spheres_data
         self.view.ui.graphicsView.setScene(QGraphicsScene(self.view))  # Create a new QGraphicsScene
