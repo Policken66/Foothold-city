@@ -15,6 +15,7 @@ class VisualizationWidget(QWidget):
         self.canvas = FigureCanvas(self.figure)
         self._spheres = None
         self.plt_size =5
+        self.plot = plt
 
         layout = QVBoxLayout(self)
         layout.addWidget(self.canvas)
@@ -139,8 +140,8 @@ class VisualizationWidget(QWidget):
         self.ax.set_yticks([])
 
         self.canvas.draw()
-        plt.show()
-        plt.close()
+        #plt.show()
+        #plt.close()
 
 
     def get_text_position(self, angle, x, y, offset):
