@@ -66,7 +66,11 @@ class FootholdCityController:
 
     def pushButton_open_plot_clicked(self):
         print("Button open plot clicked")
-        self.visualization.plot.show()
+        if self.visualization is not None:
+            self.visualization.plot.show()
+        else:
+            return
+
 
     def listWidget_itemClicked(self, item):
         """Обработчик выбора элемента в QListWidget."""
