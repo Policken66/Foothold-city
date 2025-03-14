@@ -11,7 +11,7 @@ class VisualizationWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.figure, self.ax = plt.subplots(figsize=(6, 6))
+        self.figure, self.ax = plt.subplots(figsize=(10, 10))
         self.canvas = FigureCanvas(self.figure)
         self._spheres = None
         self.plt_size =5
