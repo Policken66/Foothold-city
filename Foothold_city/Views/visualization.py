@@ -6,6 +6,10 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 import numpy as np
 
+# Установка глобальных параметров для шрифта Times New Roman
+plt.rcParams['font.family'] = 'serif'
+plt.rcParams['font.serif'] = ['Times New Roman']
+plt.rcParams['font.size'] = 10  # Размер шрифта по умолчанию
 
 class VisualizationWidget(QWidget):
     def __init__(self, parent=None):
@@ -57,10 +61,10 @@ class VisualizationWidget(QWidget):
         self.ax.axvline(x=0, color='gray', linewidth=1, linestyle='--')
 
         # Подписи к сферам
-        self.ax.text(self.plt_size, self.plt_size, 'Политическая сфера', ha='center', va='center', fontsize=16, color='gray')
-        self.ax.text(-self.plt_size, self.plt_size, 'Экономическая сфера', ha='center', va='center', fontsize=16, color='gray')
-        self.ax.text(-self.plt_size, -self.plt_size, 'Социальная сфера', ha='center', va='center', fontsize=16, color='gray')
-        self.ax.text(self.plt_size, -self.plt_size, 'Духовная сфера', ha='center', va='center', fontsize=16, color='gray')
+        self.ax.text(self.plt_size, 1, 'Политическая сфера', ha='center', va='center', fontsize=16, color='gray')
+        self.ax.text(-self.plt_size, 1, 'Экономическая сфера', ha='center', va='center', fontsize=16, color='gray')
+        self.ax.text(-self.plt_size, -1, 'Социальная сфера', ha='center', va='center', fontsize=16, color='gray')
+        self.ax.text(self.plt_size, -1, 'Духовная сфера', ha='center', va='center', fontsize=16, color='gray')
 
         self.plot_axes()
 
@@ -99,7 +103,7 @@ class VisualizationWidget(QWidget):
         
         # Добавляем в легенду обозначение для точек (только один раз)
         self.ax.scatter([0], [0], facecolors='none', edgecolors='black', s=50, 
-                       label='Точки численных\nхарактеристик\nописания городской среды\n1-го рода')
+                       label='Точки численных\nхарактеристик\nописания городской среды')
         
         for sphere, axes in self._spheres.items():
             start_angle, end_angle = sphere_angles[sphere]
@@ -179,7 +183,7 @@ class VisualizationWidget(QWidget):
                     fontsize=8,
                     ha='center',
                     va='center',
-                    color=color
+                    color='black'
                 )
 
         # рисуем полигон
@@ -189,7 +193,7 @@ class VisualizationWidget(QWidget):
             points = points[sorted_indices]
             X, Y = points[:, 0], points[:, 1]
 
-            self.ax.fill(X, Y, color=color, alpha=0.3, label=city_name)
+            #self.ax.fill(X, Y, color=color, alpha=0.3, label=city_name)
             self.ax.plot(np.append(X, X[0]), np.append(Y, Y[0]), color=color, linewidth=2)
 
         # добавление легенды
