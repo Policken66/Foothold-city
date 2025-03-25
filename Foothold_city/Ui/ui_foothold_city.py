@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file '.\Foothold_city\Ui\ui_foothold_city.ui'
+# Form implementation generated from reading ui file 'ui_foothold_city.ui'
 #
 # Created by: PyQt6 UI code generator 6.8.1
 #
@@ -12,18 +12,11 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_FootholdCity(object):
     def setupUi(self, FootholdCity):
         FootholdCity.setObjectName("FootholdCity")
-        FootholdCity.resize(880, 448)
+        FootholdCity.resize(966, 561)
         self.centralwidget = QtWidgets.QWidget(parent=FootholdCity)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName("gridLayout")
-        self.graphicsView = QGraphicsViewDataVisualization(parent=self.centralwidget)
-        self.graphicsView.setMinimumSize(QtCore.QSize(600, 400))
-        self.graphicsView.setObjectName("graphicsView")
-        self.gridLayout.addWidget(self.graphicsView, 0, 0, 1, 2)
-        self.pushButton_open_plot = QtWidgets.QPushButton(parent=self.centralwidget)
-        self.pushButton_open_plot.setObjectName("pushButton_open_plot")
-        self.gridLayout.addWidget(self.pushButton_open_plot, 1, 1, 1, 1)
         self.pushButton_open = QtWidgets.QPushButton(parent=self.centralwidget)
         self.pushButton_open.setObjectName("pushButton_open")
         self.gridLayout.addWidget(self.pushButton_open, 1, 0, 1, 1)
@@ -35,6 +28,13 @@ class Ui_FootholdCity(object):
         self.listWidget.setSizePolicy(sizePolicy)
         self.listWidget.setObjectName("listWidget")
         self.gridLayout.addWidget(self.listWidget, 0, 2, 2, 1)
+        self.graphicsView = QGraphicsViewDataVisualization(parent=self.centralwidget)
+        self.graphicsView.setMinimumSize(QtCore.QSize(600, 400))
+        self.graphicsView.setObjectName("graphicsView")
+        self.gridLayout.addWidget(self.graphicsView, 0, 0, 1, 2)
+        self.pushButton_open_plot = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.pushButton_open_plot.setObjectName("pushButton_open_plot")
+        self.gridLayout.addWidget(self.pushButton_open_plot, 1, 1, 1, 1)
         FootholdCity.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(FootholdCity)
@@ -43,6 +43,6 @@ class Ui_FootholdCity(object):
     def retranslateUi(self, FootholdCity):
         _translate = QtCore.QCoreApplication.translate
         FootholdCity.setWindowTitle(_translate("FootholdCity", "Опорный город"))
-        self.pushButton_open_plot.setText(_translate("FootholdCity", "Открыть график"))
         self.pushButton_open.setText(_translate("FootholdCity", "Открыть"))
+        self.pushButton_open_plot.setText(_translate("FootholdCity", "Открыть график"))
 from Foothold_city.Widgets.qgraphicsview_data_vizualization import QGraphicsViewDataVisualization
