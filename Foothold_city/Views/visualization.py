@@ -3,7 +3,7 @@ import random
 from matplotlib.patches import FancyArrowPatch
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
-from PyQt6.QtWidgets import QWidget, QVBoxLayout
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QCheckBox, QHBoxLayout, QListWidget, QListWidgetItem, QLabel, QPushButton
 import numpy as np
 
 # Установка глобальных параметров для шрифта Times New Roman
@@ -22,21 +22,88 @@ class VisualizationWidget(QWidget):
         self.plot = plt
         self.cities_data = {}  # словарь для хранения данных нескольких городов
         self.color_palette = ['cyan', 'magenta', 'yellow', 'lime', 'orange', 'purple', 'pink', 'brown']
+        self.value_visibility = {}  # словарь для отслеживания видимости значений для каждого города
 
-        layout = QVBoxLayout(self)
-        layout.addWidget(self.canvas)
-        self.setLayout(layout)
+        # Создаем основной layout
+        main_layout = QHBoxLayout(self)
+        
+        # Создаем контейнер для графика
+        graph_container = QWidget()
+        graph_layout = QVBoxLayout(graph_container)
+        graph_layout.addWidget(self.canvas)
+
+        self.checkbox_label = QLabel("Скрыть/показать значения")
+        self.button_clear_checkboxes = QPushButton("Очистить все")
+        self.button_clear_checkboxes.clicked.connect(self.clear_checkboxes)
+
+        # Создаем список для чекбоксов
+        self.checkbox_list = QListWidget()
+        self.checkbox_list.setFixedWidth(150)  # Фиксированная ширина для списка
+        
+        # Создаем контейнер для чекбоксов
+        checkboxes_container = QWidget()
+        checkboxes_layout = QVBoxLayout(checkboxes_container)
+        checkboxes_layout.addWidget(self.checkbox_label)
+        checkboxes_layout.addWidget(self.checkbox_list)   
+        checkboxes_layout.addWidget(self.button_clear_checkboxes)              
+        
+        # Добавляем виджеты в основной layout
+        main_layout.addWidget(graph_container)
+        main_layout.addWidget(checkboxes_container)
+
+        
+        
+        self.setLayout(main_layout)
 
     def add_city_data(self, city_name, spheres_data):
         """добавить или обновить данные для конкретного города"""
         self.cities_data[city_name] = spheres_data
         self._spheres = spheres_data  #сохранить данные посленего добавленного города для отрисовки осей
+        
+        # Создаем виджет для чекбокса
+        checkbox_widget = QWidget()
+        checkbox_layout = QHBoxLayout(checkbox_widget)
+        checkbox_layout.setContentsMargins(5, 2, 5, 2)
+        
+        # Создаем чекбокс
+        checkbox = QCheckBox(f"{city_name}")
+        checkbox.setChecked(True)  # По умолчанию значения видимы
+        checkbox.stateChanged.connect(lambda state, city=city_name: self.toggle_city_values(city, state))
+        checkbox_layout.addWidget(checkbox)
+        
+        # Создаем элемент списка
+        item = QListWidgetItem()
+        item.setSizeHint(checkbox_widget.sizeHint())
+        
+        # Добавляем виджет в список
+        self.checkbox_list.addItem(item)
+        self.checkbox_list.setItemWidget(item, checkbox_widget)
+        
+        self.value_visibility[city_name] = True
         self.setup_quadrants()
+
+    def remove_city_checkbox(self, city_name):
+        """Remove checkbox for a specific city from the list widget"""
+        for i in range(self.checkbox_list.count()):
+            item = self.checkbox_list.item(i)
+            widget = self.checkbox_list.itemWidget(item)
+            checkbox = widget.findChild(QCheckBox)
+            if checkbox and checkbox.text() == city_name:
+                self.checkbox_list.takeItem(i)
+                break
 
     def clear_cities(self):
         """очистить данные о городах"""
         self.cities_data.clear()
         self._spheres = None
+        # Очищаем список чекбоксов
+        self.checkbox_list.clear()
+        self.value_visibility.clear()
+        self.setup_quadrants()
+
+    def toggle_city_values(self, city_name, state):
+        """Переключение видимости значений для конкретного города"""
+        self.value_visibility[city_name] = bool(state)
         self.setup_quadrants()
 
     @property
@@ -57,14 +124,14 @@ class VisualizationWidget(QWidget):
         self.ax.set_ylim(-12, 12)
 
         # Разделение на 4 части
-        self.ax.axhline(y=0, color='gray', linewidth=1, linestyle='--', label='Разделение на сферы')
-        self.ax.axvline(x=0, color='gray', linewidth=1, linestyle='--')
+        self.ax.axhline(y=0, color=(153/255, 153/255, 153/255), linewidth=1, linestyle='--', label='Разделение на сферы')
+        self.ax.axvline(x=0,color=(153/255, 153/255, 153/255), linewidth=1, linestyle='--')
 
         # Подписи к сферам
-        self.ax.text(self.plt_size, 1, 'Политическая сфера', ha='center', va='center', fontsize=16, color='gray')
-        self.ax.text(-self.plt_size, 1, 'Экономическая сфера', ha='center', va='center', fontsize=16, color='gray')
-        self.ax.text(-self.plt_size, -1, 'Социальная сфера', ha='center', va='center', fontsize=16, color='gray')
-        self.ax.text(self.plt_size, -1, 'Духовная сфера', ha='center', va='center', fontsize=16, color='gray')
+        self.ax.text(self.plt_size, 1, 'Политическая сфера', ha='center', va='center', fontsize=24, color='gray')
+        self.ax.text(-self.plt_size, 1, 'Экономическая сфера', ha='center', va='center', fontsize=24, color='gray')
+        self.ax.text(-self.plt_size, -1, 'Социальная сфера', ha='center', va='center', fontsize=24, color='gray')
+        self.ax.text(self.plt_size, -1, 'Духовная сфера', ha='center', va='center', fontsize=24, color='gray')
 
         self.plot_axes()
 
@@ -178,13 +245,16 @@ class VisualizationWidget(QWidget):
 
                 # рисуем точку
                 self.ax.scatter(x, y, color=color, zorder=3)
-                self.ax.text(
-                    x * 1.1, y * 1.1, f"{value}",
-                    fontsize=8,
-                    ha='center',
-                    va='center',
-                    color='black'
-                )
+                
+                # Показываем значение только если включена видимость для этого города
+                if self.value_visibility.get(city_name, True):
+                    self.ax.text(
+                        x * 1.1, y * 1.1, f"{value}",
+                        fontsize=8,
+                        ha='center',
+                        va='center',
+                        color='black'
+                    )
 
         # рисуем полигон
         if len(points) >= 3:
@@ -194,7 +264,7 @@ class VisualizationWidget(QWidget):
             X, Y = points[:, 0], points[:, 1]
 
             #self.ax.fill(X, Y, color=color, alpha=0.3, label=city_name)
-            self.ax.plot(np.append(X, X[0]), np.append(Y, Y[0]), color=color, linewidth=2)
+            self.ax.plot(np.append(X, X[0]), np.append(Y, Y[0]), color=color, linewidth=2, label=city_name)
 
         # добавление легенды
         legend = self.ax.legend(loc='upper left', bbox_to_anchor=(1.14, 1.0), borderaxespad=0.5)
@@ -212,3 +282,13 @@ class VisualizationWidget(QWidget):
             return ('right', 'center', x - offset, y)
         else:
             return ('center', 'top', x, y - offset)
+        
+    def clear_checkboxes(self):
+        """Сбросить чекбоксы"""
+        for i in range(self.checkbox_list.count()):
+            item = self.checkbox_list.item(i)
+            widget = self.checkbox_list.itemWidget(item)
+            checkbox = widget.findChild(QCheckBox)
+            if checkbox:
+                checkbox.setChecked(False)
+

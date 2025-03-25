@@ -121,6 +121,8 @@ class FootholdCityController:
         if item.isSelected():
             self.visualization.add_city_data(city_name, city_spheres_data)
         else:
+            # Удаляем чекбокс города
+            self.visualization.remove_city_checkbox(city_name)
             # Обновляем визуализацию без этого города
             self.visualization.cities_data.pop(city_name, None)
             if self.visualization.cities_data:
