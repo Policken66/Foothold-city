@@ -1,3 +1,4 @@
+from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QMainWindow, QGraphicsScene, QSizePolicy
 
 from Foothold_city.Ui.ui_foothold_city import Ui_FootholdCity
@@ -9,6 +10,8 @@ class FootholdCityView(QMainWindow):
         super().__init__()  # Вызываем конструктор родительского класса
         self.ui = Ui_FootholdCity()  # Создаем экземпляр UI
         self.ui.setupUi(self)  # Устанавливаем интерфейс
+
+        self.setWindowIcon(QIcon("Resources/Images/icon.png"))
 
         # Добавляем стили к QListWidget
         self.style_for_QListWidget()
