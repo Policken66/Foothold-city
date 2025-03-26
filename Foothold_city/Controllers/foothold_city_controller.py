@@ -83,9 +83,15 @@ class FootholdCityController:
             # создайм новое окно
             self.popup_window = QWidget()  # Сохраняем ссылку на окно
             self.popup_window.setWindowTitle("График городов")
+            popup_visualization.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding
+            )
             layout = QVBoxLayout(self.popup_window)
             layout.addWidget(popup_visualization)
-            self.popup_window.resize(800, 800)
+            layout.setContentsMargins(0, 0, 0, 0)
+
+            self.popup_window.showMaximized()            
             self.popup_window.show()
         else:
             return

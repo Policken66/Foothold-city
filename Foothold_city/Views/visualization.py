@@ -37,6 +37,8 @@ class VisualizationWidget(QWidget):
         self.checkbox_label = QLabel("Скрыть/показать значения")
         self.button_clear_checkboxes = QPushButton("Очистить все")
         self.button_clear_checkboxes.clicked.connect(self.clear_checkboxes)
+        self.button_show_checkboxes = QPushButton("Показать все")
+        self.button_show_checkboxes.clicked.connect(self.show_checkboxes)
 
         # Создаем список для чекбоксов
         self.checkbox_list = QListWidget()
@@ -45,7 +47,8 @@ class VisualizationWidget(QWidget):
         checkboxes_container = QWidget()
         checkboxes_layout = QVBoxLayout(checkboxes_container)
         checkboxes_layout.addWidget(self.checkbox_label)
-        checkboxes_layout.addWidget(self.checkbox_list)   
+        checkboxes_layout.addWidget(self.checkbox_list)  
+        checkboxes_layout.addWidget(self.button_show_checkboxes)  
         checkboxes_layout.addWidget(self.button_clear_checkboxes)              
         
         # Добавляем виджеты в основной layout
@@ -301,4 +304,13 @@ class VisualizationWidget(QWidget):
             checkbox = widget.findChild(QCheckBox)
             if checkbox:
                 checkbox.setChecked(False)
+
+    def show_checkboxes(self):
+        """выделить чекбоксы"""
+        for i in range(self.checkbox_list.count()):
+            item = self.checkbox_list.item(i)
+            widget = self.checkbox_list.itemWidget(item)
+            checkbox = widget.findChild(QCheckBox)
+            if checkbox:
+                checkbox.setChecked(True)
 
