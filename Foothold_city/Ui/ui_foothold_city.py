@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'ui_foothold_city.ui'
+# Form implementation generated from reading ui file '.\Foothold_city\Ui\ui_foothold_city.ui'
 #
 # Created by: PyQt6 UI code generator 6.8.1
 #
@@ -17,9 +17,11 @@ class Ui_FootholdCity(object):
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName("gridLayout")
-        self.pushButton_open = QtWidgets.QPushButton(parent=self.centralwidget)
-        self.pushButton_open.setObjectName("pushButton_open")
-        self.gridLayout.addWidget(self.pushButton_open, 1, 0, 1, 1)
+        self.gridLayout_3 = QtWidgets.QGridLayout()
+        self.gridLayout_3.setObjectName("gridLayout_3")
+        self.comboBox_sort = QtWidgets.QComboBox(parent=self.centralwidget)
+        self.comboBox_sort.setObjectName("comboBox_sort")
+        self.gridLayout_3.addWidget(self.comboBox_sort, 0, 2, 1, 1)
         self.listWidget = QtWidgets.QListWidget(parent=self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -27,14 +29,27 @@ class Ui_FootholdCity(object):
         sizePolicy.setHeightForWidth(self.listWidget.sizePolicy().hasHeightForWidth())
         self.listWidget.setSizePolicy(sizePolicy)
         self.listWidget.setObjectName("listWidget")
-        self.gridLayout.addWidget(self.listWidget, 0, 2, 2, 1)
+        self.gridLayout_3.addWidget(self.listWidget, 2, 2, 1, 2)
+        self.pushButton_open_plot = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.pushButton_open_plot.setObjectName("pushButton_open_plot")
+        self.gridLayout_3.addWidget(self.pushButton_open_plot, 3, 1, 1, 1)
         self.graphicsView = QGraphicsViewDataVisualization(parent=self.centralwidget)
         self.graphicsView.setMinimumSize(QtCore.QSize(600, 400))
         self.graphicsView.setObjectName("graphicsView")
-        self.gridLayout.addWidget(self.graphicsView, 0, 0, 1, 2)
-        self.pushButton_open_plot = QtWidgets.QPushButton(parent=self.centralwidget)
-        self.pushButton_open_plot.setObjectName("pushButton_open_plot")
-        self.gridLayout.addWidget(self.pushButton_open_plot, 1, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.graphicsView, 0, 0, 3, 2)
+        self.pushButton_start_sort = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.pushButton_start_sort.setObjectName("pushButton_start_sort")
+        self.gridLayout_3.addWidget(self.pushButton_start_sort, 0, 3, 1, 1)
+        self.pushButton_open = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.pushButton_open.setObjectName("pushButton_open")
+        self.gridLayout_3.addWidget(self.pushButton_open, 3, 0, 1, 1)
+        self.pushButton_clear = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.pushButton_clear.setObjectName("pushButton_clear")
+        self.gridLayout_3.addWidget(self.pushButton_clear, 3, 2, 1, 2)
+        self.pushButton_reset_sort = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.pushButton_reset_sort.setObjectName("pushButton_reset_sort")
+        self.gridLayout_3.addWidget(self.pushButton_reset_sort, 1, 2, 1, 2)
+        self.gridLayout.addLayout(self.gridLayout_3, 0, 2, 1, 1)
         FootholdCity.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(FootholdCity)
@@ -43,6 +58,9 @@ class Ui_FootholdCity(object):
     def retranslateUi(self, FootholdCity):
         _translate = QtCore.QCoreApplication.translate
         FootholdCity.setWindowTitle(_translate("FootholdCity", "Опорный город"))
-        self.pushButton_open.setText(_translate("FootholdCity", "Открыть"))
         self.pushButton_open_plot.setText(_translate("FootholdCity", "Открыть график"))
+        self.pushButton_start_sort.setText(_translate("FootholdCity", "Сортировать"))
+        self.pushButton_open.setText(_translate("FootholdCity", "Открыть"))
+        self.pushButton_clear.setText(_translate("FootholdCity", "Очистить график"))
+        self.pushButton_reset_sort.setText(_translate("FootholdCity", "Сбросить сортировку"))
 from Foothold_city.Widgets.qgraphicsview_data_vizualization import QGraphicsViewDataVisualization

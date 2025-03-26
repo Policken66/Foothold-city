@@ -21,15 +21,12 @@ class FootholdCityController:
         # Подключение сигналов кнопок к соответствующим обработчикам событий
         self.view.ui.pushButton_open.clicked.connect(self.pushButton_open_clicked)
         self.view.ui.pushButton_open_plot.clicked.connect(self.pushButton_open_plot_clicked)
+        self.view.ui.pushButton_clear.clicked.connect(self.clear_visualization)
+        self.view.ui.pushButton_start_sort.clicked.connect(self.pushButton_start_sort_clicked)
 
         # Настройка QListWidget для множественного выбора
         self.view.ui.listWidget.setSelectionMode(self.view.ui.listWidget.SelectionMode.MultiSelection)
         self.view.ui.listWidget.itemClicked.connect(self.listWidget_itemClicked)
-
-        # Добавляем кнопку очистки графика
-        self.clear_button = QPushButton("Очистить график", self.view)
-        self.clear_button.clicked.connect(self.clear_visualization)
-        self.view.ui.gridLayout.addWidget(self.clear_button, 1, 2, 1, 1)
 
         # Переменные
         self.visualization = None
@@ -187,3 +184,6 @@ class FootholdCityController:
         self.view.ui.graphicsView.setScene(QGraphicsScene(self.view))  # Create a new QGraphicsScene
         self.view.ui.graphicsView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.view.ui.graphicsView.scene().addWidget(self.visualization)
+
+    def pushButton_start_sort_clicked(self):
+        print("pushButton_start_sort_clicked")
