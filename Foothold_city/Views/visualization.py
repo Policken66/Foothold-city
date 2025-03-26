@@ -216,7 +216,7 @@ class VisualizationWidget(QWidget):
                 #добавить надпись оси
                 angle_deg = np.degrees(angle) % 360
                 ha, va, text_x, text_y = self.get_text_position(
-                    angle_deg, x_end, y_end, offset=1.5
+                    angle_deg, x_end, y_end 
                 )
                 self.ax.text(
                     text_x, text_y, axis_name,
@@ -225,6 +225,8 @@ class VisualizationWidget(QWidget):
                     alpha=0.3,
                     ha=ha,
                     va=va,
+                    rotation=angle_deg,
+                    rotation_mode='anchor',
                     bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='none')
                 )
 
@@ -285,16 +287,27 @@ class VisualizationWidget(QWidget):
         # Adjust the figure to make room for the legend
         self.figure.subplots_adjust(right=0.65)
 
-    def get_text_position(self, angle, x, y, offset):
+    def get_text_position(self, angle, x, y):
         """Определение позиции подписи оси"""
-        if 0 <= angle < 45 or 315 <= angle < 360:
-            return ('left', 'center', x + offset, y)
-        elif 45 <= angle < 135:
-            return ('center', 'bottom', x, y + offset)
-        elif 135 <= angle < 225:
-            return ('right', 'center', x - offset, y)
-        else:
-            return ('center', 'top', x, y - offset)
+        # Добавляем смещение от конца оси
+        offset_x = x
+        offset_y = y
+
+        if 0 <= angle < 45:  # Начало 1-й четверти
+            return ('left', 'center', offset_x, offset_y)
+        elif 45 <= angle < 90:  # Конец 1-й четверти
+            return ('left', 'center', offset_x, offset_y)
+        elif 90 <= angle < 135:  # Начало 2-й четверти
+            return ('left', 'center', offset_x, offset_y)
+        elif 135 <= angle < 180:  # Конец 2-й четверти
+            return ('left', 'center', offset_x, offset_y)
+        elif 180 <= angle < 225:  # конец 3-й четверти
+            return ('left', 'center', offset_x, offset_y)
+        elif 225 <= angle < 315:  # 4-я четверть
+            return ('left', 'center', offset_x, offset_y)
+        else:  # конец 4-й четверти (315-360)
+            return ('left', 'center', offset_x, offset_y)
+    
         
     def clear_checkboxes(self):
         """Сбросить чекбоксы"""
