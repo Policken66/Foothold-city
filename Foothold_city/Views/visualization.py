@@ -218,14 +218,24 @@ class VisualizationWidget(QWidget):
                 ha, va, text_x, text_y = self.get_text_position(
                     angle_deg, x_end, y_end 
                 )
+                
+                # Разбиваем длинные надписи на несколько строк
+                wrapped_text = self.wrap_text(axis_name)
+                
+                # Добавляем дополнительное вращение для второй и третьей четвертей
+                if 90 <= angle_deg < 270:  # Вторая и третья четверти
+                    rotation = angle_deg + 180
+                else:
+                    rotation = angle_deg
+                
                 self.ax.text(
-                    text_x, text_y, axis_name,
+                    text_x, text_y, wrapped_text,
                     fontsize=14,
                     color = (0/255, 0/255, 0/255) , 
                     alpha=0.3,
                     ha=ha,
                     va=va,
-                    rotation=angle_deg,
+                    rotation=rotation,
                     rotation_mode='anchor',
                     bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='none')
                 )
@@ -290,20 +300,22 @@ class VisualizationWidget(QWidget):
     def get_text_position(self, angle, x, y):
         """Определение позиции подписи оси"""
         # Добавляем смещение от конца оси
-        offset_x = x
-        offset_y = y
+        offset_x = x * 1.1
+        offset_y = y * 1.1
 
         if 0 <= angle < 45:  # Начало 1-й четверти
             return ('left', 'center', offset_x, offset_y)
         elif 45 <= angle < 90:  # Конец 1-й четверти
             return ('left', 'center', offset_x, offset_y)
         elif 90 <= angle < 135:  # Начало 2-й четверти
-            return ('left', 'center', offset_x, offset_y)
+            return ('right', 'center', offset_x, offset_y)
         elif 135 <= angle < 180:  # Конец 2-й четверти
-            return ('left', 'center', offset_x, offset_y)
+            return ('right', 'center', offset_x, offset_y)
         elif 180 <= angle < 225:  # конец 3-й четверти
-            return ('left', 'center', offset_x, offset_y)
-        elif 225 <= angle < 315:  # 4-я четверть
+            return ('right', 'center', offset_x, offset_y)
+        elif 225 <= angle < 270:  # 4-я четверть
+            return ('right', 'center', offset_x, offset_y)
+        elif 270 <= angle < 315:  # 4-я четверть
             return ('left', 'center', offset_x, offset_y)
         else:  # конец 4-й четверти (315-360)
             return ('left', 'center', offset_x, offset_y)
@@ -327,3 +339,24 @@ class VisualizationWidget(QWidget):
             if checkbox:
                 checkbox.setChecked(True)
 
+    def wrap_text(self, text, max_chars_per_line=15):
+            """Разбивает текст на несколько строк,
+              если он превышает максимальную длину строки"""
+            words = text.split()
+            lines = []
+            current_line = []
+            current_length = 0
+            
+            for word in words:
+                if current_length + len(word) + 1 <= max_chars_per_line:
+                    current_line.append(word)
+                    current_length += len(word) + 1
+                else:
+                    lines.append(' '.join(current_line))
+                    current_line = [word]
+                    current_length = len(word)
+            
+            if current_line:
+                lines.append(' '.join(current_line))
+            
+            return '\n'.join(lines)
