@@ -9,19 +9,21 @@ import numpy as np
 # Установка глобальных параметров для шрифта Times New Roman
 plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = ['Times New Roman']
-plt.rcParams['font.size'] = 10  # Размер шрифта по умолчанию
+plt.rcParams['font.size'] = 14  # Размер шрифта по умолчанию
 
 class VisualizationWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.figure, self.ax = plt.subplots(figsize=(10, 10))
+        self.figure, self.ax = plt.subplots(figsize=(20, 20))
         self.canvas = FigureCanvas(self.figure)
         self._spheres = None
-        self.plt_size = 8
+        self.plt_size = 12
         self.plot = plt
         self.cities_data = {}  # словарь для хранения данных нескольких городов
-        self.color_palette = ['cyan', 'magenta', 'yellow', 'lime', 'orange', 'purple', 'pink', 'brown']
+        #словарь для цветовой палитры
+        self.color_palette = ['#9673a64d', '#b854504d', '#d6b6564d', '#d79b004d', '#82b3664d', '#6c8ebf4d', 
+                              '#6666664d', '#b465044d', '#ae41324d', '#0e80884d','#56517e4d','#23445d4d']
         self.value_visibility = {}  # словарь для отслеживания видимости значений для каждого города
 
         # Создаем основной layout
@@ -38,7 +40,6 @@ class VisualizationWidget(QWidget):
 
         # Создаем список для чекбоксов
         self.checkbox_list = QListWidget()
-        self.checkbox_list.setFixedWidth(150)  # Фиксированная ширина для списка
         
         # Создаем контейнер для чекбоксов
         checkboxes_container = QWidget()
@@ -49,9 +50,14 @@ class VisualizationWidget(QWidget):
         
         # Добавляем виджеты в основной layout
         main_layout.addWidget(graph_container)
-        main_layout.addWidget(checkboxes_container)
+        main_layout.addWidget(checkboxes_container)     
 
-        
+        # Устанавливаем фиксированную ширину для контейнера с чекбоксами
+        checkboxes_container.setFixedWidth(180)
+
+        # Добавляем виджеты в основной layout с указанием коэффициентов stretch
+        main_layout.addWidget(graph_container, stretch=3)  # График занимает больше места
+        main_layout.addWidget(checkboxes_container, stretch=1)  # Чекбоксы занимают меньше места  
         
         self.setLayout(main_layout)
 
@@ -124,14 +130,14 @@ class VisualizationWidget(QWidget):
         self.ax.set_ylim(-12, 12)
 
         # Разделение на 4 части
-        self.ax.axhline(y=0, color=(153/255, 153/255, 153/255), linewidth=1, linestyle='--', label='Разделение на сферы')
-        self.ax.axvline(x=0,color=(153/255, 153/255, 153/255), linewidth=1, linestyle='--')
+        self.ax.axhline(y=0, color = (153/255, 153/255, 153/255) , alpha=0.3, linewidth=1, linestyle='--', label='Разделение на сферы')
+        self.ax.axvline(x=0, color = (153/255, 153/255, 153/255), alpha=0.3, linewidth=1, linestyle='--')
 
         # Подписи к сферам
-        self.ax.text(self.plt_size, 1, 'Политическая сфера', ha='center', va='center', fontsize=24, color='gray')
-        self.ax.text(-self.plt_size, 1, 'Экономическая сфера', ha='center', va='center', fontsize=24, color='gray')
-        self.ax.text(-self.plt_size, -1, 'Социальная сфера', ha='center', va='center', fontsize=24, color='gray')
-        self.ax.text(self.plt_size, -1, 'Духовная сфера', ha='center', va='center', fontsize=24, color='gray')
+        self.ax.text(self.plt_size, 1, 'Политическая сфера', ha='center', va='center', fontsize=24, color='gray', alpha=0.3,)
+        self.ax.text(-self.plt_size, 1, 'Экономическая сфера', ha='center', va='center', fontsize=24, color='gray', alpha=0.3,)
+        self.ax.text(-self.plt_size, -1, 'Социальная сфера', ha='center', va='center', fontsize=24, color='gray', alpha=0.3,)
+        self.ax.text(self.plt_size, -1, 'Духовная сфера', ha='center', va='center', fontsize=24, color='gray', alpha=0.3,)
 
         self.plot_axes()
 
@@ -165,11 +171,11 @@ class VisualizationWidget(QWidget):
     def _draw_axes(self, sphere_angles):
         """рисуем оси и их надписи"""
         # Добавляем в легенду обозначение для осей
-        self.ax.plot([0, 0], [0, 0], color='blue', linestyle='--', linewidth=1, 
+        self.ax.plot([0, 0], [0, 0], color = (0/255, 0/255, 0/255) , alpha=0.3, linestyle='--', linewidth=1, 
                     marker='>', markersize=5, label='Оси численных\nхарактеристик\nописания городской среды')
         
         # Добавляем в легенду обозначение для точек (только один раз)
-        self.ax.scatter([0], [0], facecolors='none', edgecolors='black', s=50, 
+        self.ax.scatter([0], [0], facecolors='none', edgecolors='black', alpha=0.3, s=50, 
                        label='Точки численных\nхарактеристик\nописания городской среды')
         
         for sphere, axes in self._spheres.items():
@@ -196,7 +202,8 @@ class VisualizationWidget(QWidget):
                     (0, 0), (x_end, y_end),
                     arrowstyle='->',
                     linestyle='dashed',
-                    color='blue',
+                    color = (0/255, 0/255, 0/255) , 
+                    alpha=0.3,
                     mutation_scale=15,
                     linewidth=1,
                     zorder=1
@@ -210,10 +217,12 @@ class VisualizationWidget(QWidget):
                 )
                 self.ax.text(
                     text_x, text_y, axis_name,
-                    fontsize=10,
+                    fontsize=14,
+                    color = (0/255, 0/255, 0/255) , 
+                    alpha=0.3,
                     ha=ha,
                     va=va,
-                    bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='none', alpha=0.9)
+                    bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='none')
                 )
 
     def _draw_city_polygon(self, city_data, sphere_angles, color, city_name):
@@ -250,10 +259,11 @@ class VisualizationWidget(QWidget):
                 if self.value_visibility.get(city_name, True):
                     self.ax.text(
                         x * 1.1, y * 1.1, f"{value}",
-                        fontsize=8,
+                        fontsize=14,
                         ha='center',
                         va='center',
-                        color='black'
+                        color = (0/255, 0/255, 0/255) , 
+                        alpha=0.3,
                     )
 
         # рисуем полигон
@@ -267,7 +277,7 @@ class VisualizationWidget(QWidget):
             self.ax.plot(np.append(X, X[0]), np.append(Y, Y[0]), color=color, linewidth=2, label=city_name)
 
         # добавление легенды
-        legend = self.ax.legend(loc='upper left', bbox_to_anchor=(1.14, 1.0), borderaxespad=0.5)
+        legend = self.ax.legend(loc='upper left', bbox_to_anchor=(1.14, 1.0), borderaxespad=0.5, labelcolor='#0000004d')
         
         # Adjust the figure to make room for the legend
         self.figure.subplots_adjust(right=0.65)
