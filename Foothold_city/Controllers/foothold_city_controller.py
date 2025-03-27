@@ -40,7 +40,6 @@ class FootholdCityController:
         # Переменные
         self.visualization = None
         self.normalized_data = None
-        self.radial_graphics = None
         self.popup_window = None  # Добавляем переменную для хранения ссылки на окно
         self.example_data = {
             "Политическая": [("Население", 8), ("Избирательная кампания", 3)],
@@ -62,6 +61,7 @@ class FootholdCityController:
         )
 
         if file_path:  # Если файл выбран
+            self.all_close()
             print(f"Выбран файл: {file_path}")
             self.file_manager.load_excel(file_path)  # Загружаем данные в модель
             cities = self.file_manager.get_city_names()  # Получаем список городов
@@ -349,3 +349,13 @@ class FootholdCityController:
             area += x1 * y2 - y1 * x2
 
         return abs(area) / 2
+
+    def all_close(self):
+        self.view.ui.listWidget.clear()
+        self.view.ui.graphicsView.scene().clear()
+        self.view.ui.textEdit_sort.clear()
+        self.view.ui.comboBox_sort.setCurrentIndex(0)
+        self.file_manager = FileManager()
+        self.visualization = None
+        self.normalized_data = None
+        self.popup_window = None  # Добавляем переменную для хранения ссылки на окно
