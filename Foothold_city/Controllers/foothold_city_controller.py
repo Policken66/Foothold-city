@@ -34,8 +34,8 @@ class FootholdCityController:
         # Начальные настройки для QComboBox
         self.comboBox_setting()
 
-        # Инициализация состояния виджетов
-        # self.hide_listWidget_sort()
+        # Ограничения на QTextEdit
+        self.view.ui.textEdit_sort.setReadOnly(True)
 
         # Переменные
         self.visualization = None
@@ -252,11 +252,23 @@ class FootholdCityController:
 
         sorted_cities = sorted(cities_values.items(), key=lambda x: x[1], reverse=True)
 
-        output_text = "\n".join([f"{city}: {value:.2f}" for city, value in sorted_cities])
+        # Формируем текст для вывода с HTML-форматированием
+        output_lines = []
+        for i, (city, value) in enumerate(sorted_cities):
+            if i == 0:  # Первая строка (зелёная)
+                line = f'<span style="color: green;">{city}: {value:.2f}</span>'
+            elif i == len(sorted_cities) - 1:  # Последняя строка (красная)
+                line = f'<span style="color: red;">{city}: {value:.2f}</span>'
+            else:  # Остальные строки (по умолчанию чёрные)
+                line = f'{city}: {value:.2f}'
+            output_lines.append(line)
+
+        # Объединяем строки через <br> для переноса
+        output_text = "<br>".join(output_lines)
 
         # Очищаем и обновляем QTextEdit
         self.view.ui.textEdit_sort.clear()
-        self.view.ui.textEdit_sort.setText(output_text)
+        self.view.ui.textEdit_sort.setHtml(output_text)  # Используем setHtml для HTML-форматирования
 
     def sort_variant_2(self, data):
         print("sort_variant_2")
