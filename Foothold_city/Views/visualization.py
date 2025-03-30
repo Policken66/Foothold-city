@@ -1,29 +1,27 @@
-import math
-import random
 from matplotlib.patches import FancyArrowPatch
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QCheckBox, QHBoxLayout, QListWidget, QListWidgetItem, QLabel, QPushButton
 import numpy as np
+from Foothold_city.Resources.const import *
 
 # Установка глобальных параметров для шрифта Times New Roman
-plt.rcParams['font.family'] = 'serif'
-plt.rcParams['font.serif'] = ['Times New Roman']
-plt.rcParams['font.size'] = 14  # Размер шрифта по умолчанию
+plt.rcParams['font.family'] = font_family
+plt.rcParams['font.serif'] = font_serif
+plt.rcParams['font.size'] = font_size
 
 class VisualizationWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.figure, self.ax = plt.subplots(figsize=(30, 30))
+        self.figure, self.ax = plt.subplots(figsize=(subplots_figsize_width, subplots_figsize_heigh))
         self.canvas = FigureCanvas(self.figure)
         self._spheres = None
-        self.plt_size = 12
+        self.plt_size = 13
         self.plot = plt
         self.cities_data = {}  # словарь для хранения данных нескольких городов
         #словарь для цветовой палитры
-        self.color_palette = ['#9673a64d', '#b854504d', '#d6b6564d', '#d79b004d', '#82b3664d', '#6c8ebf4d', 
-                              '#6666664d', '#b465044d', '#ae41324d', '#0e80884d','#56517e4d','#23445d4d']
+        self.color_palette = color_palette
         self.value_visibility = {}  # словарь для отслеживания видимости значений для каждого города
 
         # Создаем основной layout
@@ -133,14 +131,14 @@ class VisualizationWidget(QWidget):
         self.ax.set_ylim(-12, 12)
 
         # Разделение на 4 части
-        self.ax.axhline(y=0, color = (153/255, 153/255, 153/255) , alpha=0.3, linewidth=1, linestyle='--', label='Разделение на сферы')
+        self.ax.axhline(y=0, color = (153/255, 153/255, 153/255) , alpha=0.3, linewidth=1, linestyle='--', label = label_spheres)
         self.ax.axvline(x=0, color = (153/255, 153/255, 153/255), alpha=0.3, linewidth=1, linestyle='--')
 
         # Подписи к сферам
-        self.ax.text(self.plt_size, 1, 'Политическая сфера', ha='center', va='center', fontsize=24, color='gray', alpha=0.3,)
-        self.ax.text(-self.plt_size, 1, 'Экономическая сфера', ha='center', va='center', fontsize=24, color='gray', alpha=0.3,)
-        self.ax.text(-self.plt_size, -1, 'Социальная сфера', ha='center', va='center', fontsize=24, color='gray', alpha=0.3,)
-        self.ax.text(self.plt_size, -1, 'Духовная сфера', ha='center', va='center', fontsize=24, color='gray', alpha=0.3,)
+        self.ax.text(self.plt_size, 1, label_politic, ha='center', va='center', fontsize=24, color='gray', alpha=0.3,)
+        self.ax.text(-self.plt_size, 1, label_economic, ha='center', va='center', fontsize=24, color='gray', alpha=0.3,)
+        self.ax.text(-self.plt_size, -1, label_social, ha='center', va='center', fontsize=24, color='gray', alpha=0.3,)
+        self.ax.text(self.plt_size, -1, label_religious, ha='center', va='center', fontsize=24, color='gray', alpha=0.3,)
 
         self.plot_axes()
 
@@ -158,7 +156,7 @@ class VisualizationWidget(QWidget):
         # рисуем оси один раз, используя данные последнего города
         self._draw_axes(sphere_angles)
 
-        # рисуем матриу для каждого города
+        # рисуем матрицу для каждого города
         for i, (city_name, city_data) in enumerate(self.cities_data.items()):
             color = self.color_palette[i % len(self.color_palette)]
             self._draw_city_polygon(city_data, sphere_angles, color, city_name)
@@ -175,11 +173,11 @@ class VisualizationWidget(QWidget):
         """рисуем оси и их надписи"""
         # Добавляем в легенду обозначение для осей
         self.ax.plot([0, 0], [0, 0], color = (0/255, 0/255, 0/255) , alpha=0.3, linestyle='--', linewidth=1, 
-                    marker='>', markersize=5, label='Оси численных\nхарактеристик\nописания городской среды')
+                    marker='>', markersize=5, label=label_numeric_axes)
         
         # Добавляем в легенду обозначение для точек (только один раз)
         self.ax.scatter([0], [0], facecolors='none', edgecolors='black', alpha=0.3, s=50, 
-                       label='Точки численных\nхарактеристик\nописания городской среды')
+                       label=label_points)
         
         for sphere, axes in self._spheres.items():
             start_angle, end_angle = sphere_angles[sphere]
@@ -288,7 +286,9 @@ class VisualizationWidget(QWidget):
             points = points[sorted_indices]
             X, Y = points[:, 0], points[:, 1]
 
-            #self.ax.fill(X, Y, color=color, alpha=0.3, label=city_name)
+            if (fill_polygon == True ):
+                self.ax.fill(X, Y, color=color, alpha=0.3, label=city_name)
+                
             self.ax.plot(np.append(X, X[0]), np.append(Y, Y[0]), color=color, linewidth=2, label=city_name)
 
         # добавление легенды
@@ -300,8 +300,8 @@ class VisualizationWidget(QWidget):
     def get_text_position(self, angle, x, y):
         """Определение позиции подписи оси"""
         # Добавляем смещение от конца оси
-        offset_x = x * 1.1
-        offset_y = y * 1.1
+        offset_x = x * labels_offset_x
+        offset_y = y * labels_offset_y
 
         if 0 <= angle < 45:  # Начало 1-й четверти
             return ('left', 'center', offset_x, offset_y)
@@ -339,7 +339,7 @@ class VisualizationWidget(QWidget):
             if checkbox:
                 checkbox.setChecked(True)
 
-    def wrap_text(self, text, max_chars_per_line=15):
+    def wrap_text(self, text, max_chars_per_line = fun_split_max_chars_per_line):
             """Разбивает текст на несколько строк,
               если он превышает максимальную длину строки"""
             words = text.split()
