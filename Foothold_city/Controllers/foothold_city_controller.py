@@ -5,6 +5,7 @@ from PyQt6.QtCore import Qt
 import matplotlib.pyplot as plt
 from PyQt6.uic.properties import QtWidgets
 
+from Foothold_city.Utils.data_analysis import DataAnalysis
 from Foothold_city.Utils.file_manager import FileManager
 from Foothold_city.Views.foothold_city_view import FootholdCityView
 from Foothold_city.Views.visualization import VisualizationWidget
@@ -47,6 +48,7 @@ class FootholdCityController:
             "Социальная": [("Коэффициент рождаемости", 10), ("Качество городской среды", 4), ("IQ города", 7)],
             "Духовная": [("Объекты наследия", 5), ("Религиозные конфессии", 3)]
         }
+        self.output_text = None
 
     def pushButton_open_clicked(self):
         """Обработчик нажатия кнопки 'Open'."""
@@ -234,121 +236,49 @@ class FootholdCityController:
             return
         selected_cities = [item.text() for item in selected_items]
         # data_selected_cities = self.normalized_data[self.normalized_data['Город'].isin(selected_cities)]
+        cities_values = {}
+        for city in selected_cities:
+            data = self.file_manager.get_city_normalized_data(city)
+            full_data = DataAnalysis.fill_data(data)
+            value = DataAnalysis.calculate_polygon_area(full_data)
+            cities_values[city] = {
+                "full_data": full_data,
+                "value": value
+            }
 
         # Распределение по действиям
         if selected_option == "Вариант 1":
-            self.sort_variant_1(selected_cities)
+            results = DataAnalysis.sort_variant_1(cities_values)
+            self.show_results(results)
         elif selected_option == "Вариант 2":
-            self.sort_variant_1(selected_cities)
+            results = DataAnalysis.sort_variant_2(cities_values)
+            self.show_results(results)
 
-    def sort_variant_1(self, cities):
-        print("sort_variant_1")
-        cities_values = {}
-        for city in cities:
-            data = self.file_manager.get_city_normalized_data(city)
-            full_data = self.fill_data(data)
-            value = self.calculate_polygon_area(full_data)
-            cities_values[city] = value
-
-        sorted_cities = sorted(cities_values.items(), key=lambda x: x[1], reverse=True)
-
-        # Формируем текст для вывода с HTML-форматированием
+    def show_results(self, result):
+        # Формируем HTML-текст для вывода
         output_lines = []
-        for i, (city, value) in enumerate(sorted_cities):
-            if i == 0:  # Первая строка (зелёная)
-                line = f'<span style="color: green;">{city}: {value:.2f}</span>'
-            elif i == len(sorted_cities) - 1:  # Последняя строка (красная)
-                line = f'<span style="color: red;">{city}: {value:.2f}</span>'
-            else:  # Остальные строки (по умолчанию чёрные)
-                line = f'{city}: {value:.2f}'
+        for entry in result:
+            city = entry["Название города"]
+            order = entry["Порядок опорного города"]
+            value = entry["value"]
+
+            # Определяем цвет в зависимости от порядка
+            if order == "Опорный город 1 порядка":
+                color = "darkgreen"  # Темно-зеленый
+            elif order == "Опорный город 2 порядка":
+                color = "goldenrod"  # Темно-желтый/золотой
+            elif order == "Опорный город 3 порядка":
+                color = "darkorange"  # Темно-оранжевый
+            elif order == "Опорный город 4 порядка":
+                color = "darkred"  # Темно-красный
+
+            # Формируем строку с HTML-форматированием
+            line = f'<span style="color: {color};">{city} : {order}</span>'
             output_lines.append(line)
 
         # Объединяем строки через <br> для переноса
-        output_text = "<br>".join(output_lines)
-
-        # Очищаем и обновляем QTextEdit
-        self.view.ui.textEdit_sort.clear()
-        self.view.ui.textEdit_sort.setHtml(output_text)  # Используем setHtml для HTML-форматирования
-
-    def sort_variant_2(self, data):
-        print("sort_variant_2")
-
-    def fill_data(self, data):
-        """
-            Заполняет NaN значения в списке на основе ближайших левого и правого значений.
-            :param data: Список числовых значений, который может содержать NaN.
-            :return: Список с заполненными значениями вместо NaN.
-            """
-        n = len(data)
-        filled_data = data.copy()  # Создаем копию списка для изменения
-
-        for i in range(n):
-            if pd.isna(filled_data[i]):  # Проверяем, является ли значение NaN
-                left_value = None
-                right_value = None
-
-                # Ищем ближайшее левое значение
-                for j in range(i - 1, -1, -1):  # Обратный проход от текущего к началу
-                    if not pd.isna(filled_data[j]):
-                        left_value = filled_data[j]
-                        break
-
-                # Ищем ближайшее правое значение
-                for k in range(i + 1, n):  # Прямой проход от текущего к концу
-                    if not pd.isna(filled_data[k]):
-                        right_value = filled_data[k]
-                        break
-
-                # Если значение все еще не найдено, используем циклическую обработку
-                if left_value is None:  # Если левое значение не найдено
-                    for j in range(n - 1, -1, -1):  # Ищем справа (конец списка)
-                        if not pd.isna(filled_data[j]):
-                            left_value = filled_data[j]
-                            break
-
-                if right_value is None:  # Если правое значение не найдено
-                    for k in range(n):  # Ищем слева (начало списка)
-                        if not pd.isna(filled_data[k]):
-                            right_value = filled_data[k]
-                            break
-
-                # Заполняем NaN средним арифметическим левого и правого значений
-                if left_value is not None and right_value is not None:
-                    filled_data[i] = (left_value + right_value) / 2
-                elif left_value is not None:
-                    filled_data[i] = left_value
-                elif right_value is not None:
-                    filled_data[i] = right_value
-
-        return filled_data
-
-    def calculate_polygon_area(self, city_data):
-        """
-        Вычисляет площадь многоугольника, образованного значениями на осях.
-        :param city_data: Список нормированных значений критериев для города.
-        :return: Площадь фигуры.
-        """
-        n = len(city_data)  # Количество критериев
-        angles = [2 * 3.14159 * i / n for i in range(n)]  # Углы для каждой оси
-        points = []
-
-        # Вычисляем координаты точек
-        for i, value in enumerate(city_data):
-            x = value * np.cos(angles[i])  # Координата x
-            y = value * np.sin(angles[i])  # Координата y
-            points.append((x, y))
-
-        # Добавляем первую точку в конец для замыкания фигуры
-        points.append(points[0])
-
-        # Вычисляем площадь многоугольника
-        area = 0
-        for i in range(len(points) - 1):
-            x1, y1 = points[i]
-            x2, y2 = points[i + 1]
-            area += x1 * y2 - y1 * x2
-
-        return abs(area) / 2
+        self.output_text = "<br>".join(output_lines)
+        self.update_textEdit()
 
     def all_close(self):
         self.view.ui.listWidget.clear()
@@ -359,3 +289,8 @@ class FootholdCityController:
         self.visualization = None
         self.normalized_data = None
         self.popup_window = None  # Добавляем переменную для хранения ссылки на окно
+
+    def update_textEdit(self):
+        # Очищаем и обновляем QTextEdit
+        self.view.ui.textEdit_sort.clear()
+        self.view.ui.textEdit_sort.setHtml(self.output_text)  # Используем setHtml для HTML-форматирования
