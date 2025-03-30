@@ -15,7 +15,7 @@ class VisualizationWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.figure, self.ax = plt.subplots(figsize=(20, 20))
+        self.figure, self.ax = plt.subplots(figsize=(30, 30))
         self.canvas = FigureCanvas(self.figure)
         self._spheres = None
         self.plt_size = 12
@@ -184,15 +184,15 @@ class VisualizationWidget(QWidget):
         for sphere, axes in self._spheres.items():
             start_angle, end_angle = sphere_angles[sphere]
             count = len(axes)
-            for i, (axis_name, value) in enumerate(axes):
+            """for i, (axis_name, value) in enumerate(axes):
                 if math.isnan(value):
-                    count -= 1
+                    count -= 1"""
             total_span = end_angle - start_angle
             step = total_span / (count + 1) if count > 1 else total_span / 2
 
             for i, (axis_name, value) in enumerate(axes):
-                if math.isnan(value):
-                    continue
+                """if math.isnan(value):
+                    continue"""
 
                 angle = start_angle + step * (i + 1)
                 max_length = 10
@@ -248,14 +248,14 @@ class VisualizationWidget(QWidget):
             start_angle, end_angle = sphere_angles[sphere]
             count = len(axes)
             for i, (axis_name, value) in enumerate(axes):
-                if math.isnan(value):
-                    count -= 1
+                """if math.isnan(value):
+                    count -= 1"""
             total_span = end_angle - start_angle
             step = total_span / (count + 1) if count > 1 else total_span / 2
 
             for i, (axis_name, value) in enumerate(axes):
-                if math.isnan(value):
-                    continue
+                """if math.isnan(value):
+                    continue"""
 
                 angle = start_angle + step * (i + 1)
                 max_length = 10
