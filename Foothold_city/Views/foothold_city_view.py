@@ -11,7 +11,7 @@ class FootholdCityView(QMainWindow):
         self.ui = Ui_FootholdCity()  # Создаем экземпляр UI
         self.ui.setupUi(self)  # Устанавливаем интерфейс
 
-        self.setWindowIcon(QIcon("Resources/Images/icon.png"))
+        self.setWindowIcon(QIcon("Foothold_city/Resources/Images/icon.svg"))
 
         # Добавляем стили к QListWidget
         self.style_for_QListWidget()
