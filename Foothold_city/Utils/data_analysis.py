@@ -112,7 +112,14 @@ class DataAnalysis:
             elif i == len(sorted_cities_all) - 1:
                 order = "Опорный город 3 порядка"
             else:
-                count_above_avg = sum(1 for value, avg in zip(data["full_data"], avg_full_data) if value >= avg)
+                # Инициализируем счётчик
+                count_above_avg = 0
+
+                # Проходим по парам значений из двух списков
+                for value, avg in zip(data["full_data"], avg_full_data):
+                    # Проверяем условие
+                    if value >= avg:
+                        count_above_avg += 1  # Увеличиваем счётчик, если условие выполнено
                 order = "Опорный город 2 порядка" if count_above_avg / len(
                     avg_full_data) > 0.5 else "Опорный город 3 порядка"
 
@@ -129,60 +136,78 @@ class DataAnalysis:
 
     @staticmethod
     def sort_variant_2(cities_values):
-        # Шаг 1: Определение экстремумов по критериям
-        max_city = None
-        max_score = float('-inf')
-        for city, data in cities_values.items():
-            total_score = sum(data["full_data"])  # Сумма всех критериев
-            if total_score > max_score:
-                max_score = total_score
-                max_city = city
+        # Шаг 3: Убираем из расчета город с максимальной и минимальной площадью
+        sorted_areas = sorted(cities_values.items(), key=lambda x: x[1]["value"])
+        min_city, max_city = sorted_areas[0][0], sorted_areas[-1][0]
+        remaining_cities = {city: data for city, data in cities_values.items() if city not in [min_city, max_city]}
 
-        # Город с максимальными значениями (Опорный город 1 порядка)
+        print("remaining_cities")
+        print(remaining_cities)
+
+        # Шаг 4: Определяем экстремумы для каждого критерия (всегда 0 и 10)
+        criteria_count = len(next(iter(cities_values.values()))["full_data"])
+        extremes = [(0, 10)] * criteria_count
+
+        print("extremes")
+        print(extremes)
+
+        # Шаг 5: Фактор 1
+        factor_1_scores = {}
+        for city, data in remaining_cities.items():
+            # Шаг 5.1: Сравниваем города по каждому критерию
+            criterion_scores = []
+            for value, (min_val, max_val) in zip(data["full_data"], extremes):
+                # Чем ближе значение к максимуму, тем меньше баллов
+                score = max_val - value
+                criterion_scores.append(score)
+
+            # Шаг 5.3: Суммируем баллы для каждого города по всем критериям
+            total_score = sum(criterion_scores)
+            factor_1_scores[city] = total_score
+
+        print("factor_1_scores")
+        print(factor_1_scores)
+
+        # Шаг 5.4: Присваиваем баллы за удаление от первого места
+        sorted_factor_1 = sorted(factor_1_scores.items(), key=lambda x: x[1])
+        factor_1_ranks = {city: rank for rank, (city, _) in enumerate(sorted_factor_1)}
+
+        print("factor_1_ranks")
+        print(factor_1_ranks)
+
+        # Шаг 6: Фактор 2
+        factor_2_scores = {}
+        for city, data in remaining_cities.items():
+            # Шаг 6.1: Сравниваем города по площади графиков
+            area = data["value"]
+
+            # Шаг 6.2: Присваиваем баллы за удаление от первого места
+            factor_2_scores[city] = area
+
+        # Присваиваем баллы за удаление от первого места
+        sorted_factor_2 = sorted(factor_2_scores.items(), key=lambda x: x[1], reverse=True)
+        factor_2_ranks = {city: rank for rank, (city, _) in enumerate(sorted_factor_2)}
+
+        print("factor_2_ranks")
+        print(factor_2_ranks)
+
+        # Шаг 7: Рассчитываем среднее арифметическое между факторами
+        overall_scores = {
+            city: (factor_1_ranks[city] + factor_2_ranks[city]) / 2 for city in remaining_cities
+        }
+
+        # Формируем результат
         result = [{"Название города": max_city, "Порядок опорного города": "Опорный город 1 порядка",
                    "value": cities_values[max_city]["value"]}]
 
-        # Исключаем лидера из дальнейшего анализа
-        remaining_cities = {city: data for city, data in cities_values.items() if city != max_city}
-
-        # Шаг 2: Первый фактор сравнения (среднее место относительно лидера)
-        criteria_count = len(next(iter(cities_values.values()))["full_data"])  # Количество критериев
-        rankings_1 = {}
-        for city, data in remaining_cities.items():
-            ranks = [
-                sum(1 for other_city in remaining_cities if remaining_cities[other_city]["full_data"][i] > value) + 1
-                for i, value in enumerate(data["full_data"])]
-            avg_rank = sum(ranks) / criteria_count
-            rankings_1[city] = avg_rank
-
-        # Шаг 3: Второй фактор сравнения (площадь графика и ранг)
-        rankings_2 = {}
-        for city, data in remaining_cities.items():
-            area = DataAnalysis.calculate_polygon_area(data["full_data"])  # Вычисляем площадь
-            rankings_2[city] = area
-
-        # Определяем ранги по площади
-        sorted_by_area = sorted(rankings_2.items(), key=lambda x: x[1], reverse=True)
-        area_ranks = {city: rank + 1 for rank, (city, _) in enumerate(sorted_by_area)}
-
-        # Шаг 4: Общее значение (среднее между местами по двум факторам)
-        overall_scores = {}
-        for city in remaining_cities:
-            overall_score = (rankings_1[city] + area_ranks[city]) / 2
-            overall_scores[city] = overall_score
-
-        # Сортировка оставшихся городов по общему значению
-        sorted_remaining = sorted(
-            overall_scores.items(),
-            key=lambda x: x[1]
-        )
-
-        # Формирование результата
-        for city, _ in sorted_remaining:
+        for city, _ in sorted(overall_scores.items(), key=lambda x: x[1]):
             result.append({
                 "Название города": city,
                 "Порядок опорного города": "Опорный город 2 порядка" if len(result) == 1 else "Опорный город 3 порядка",
-                "value": cities_values[city]["value"]
+                "value": overall_scores[city]
             })
+
+        result.append({"Название города": min_city, "Порядок опорного города": "Опорный город 4 порядка",
+                       "value": cities_values[min_city]["value"]})
 
         return result

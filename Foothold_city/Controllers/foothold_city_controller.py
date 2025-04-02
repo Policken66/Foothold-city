@@ -255,25 +255,30 @@ class FootholdCityController:
             self.show_results(results)
 
     def show_results(self, result):
+        if result is None:
+            return
         # Формируем HTML-текст для вывода
         output_lines = []
         for entry in result:
             city = entry["Название города"]
             order = entry["Порядок опорного города"]
             value = entry["value"]
+            line = ''
 
             # Определяем цвет в зависимости от порядка
             if order == "Опорный город 1 порядка":
                 color = "darkgreen"  # Темно-зеленый
+                line = f'<span style="color: {color};">{city} : {order}</span>'
             elif order == "Опорный город 2 порядка":
                 color = "goldenrod"  # Темно-желтый/золотой
+                line = f'<span style="color: {color};">{city} : {order} : {value}</span>'
             elif order == "Опорный город 3 порядка":
                 color = "darkorange"  # Темно-оранжевый
+                line = f'<span style="color: {color};">{city} : {order} : {value}</span>'
             elif order == "Опорный город 4 порядка":
                 color = "darkred"  # Темно-красный
+                line = f'<span style="color: {color};">{city} : {order}</span>'
 
-            # Формируем строку с HTML-форматированием
-            line = f'<span style="color: {color};">{city} : {order}</span>'
             output_lines.append(line)
 
         # Объединяем строки через <br> для переноса
