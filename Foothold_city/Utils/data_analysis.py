@@ -110,7 +110,7 @@ class DataAnalysis:
             if i == 0:
                 order = "Опорный город 1 порядка"
             elif i == len(sorted_cities_all) - 1:
-                order = "Опорный город 3 порядка"
+                order = "Опорный город 4 порядка"
             else:
                 # Инициализируем счётчик
                 count_above_avg = 0

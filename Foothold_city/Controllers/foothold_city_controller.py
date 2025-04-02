@@ -277,7 +277,7 @@ class FootholdCityController:
                 line = f'<span style="color: {color};">{city} : {order} : {value}</span>'
             elif order == "Опорный город 4 порядка":
                 color = "darkred"  # Темно-красный
-                line = f'<span style="color: {color};">{city} : {order}</span>'
+                line = f'<span style="color: {color};">{city}</span>'
 
             output_lines.append(line)
 
