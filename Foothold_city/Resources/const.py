@@ -38,4 +38,4 @@ labels_offset_y = 1.18  # Добавляем смещение от конца о
 fill_polygon = False
 
 """путь хранения иконки приложения"""
-icon_path = "Foothold_city/Resources/Images/icon.svg"
+icon_path = "Foothold_city/icon.ico"
