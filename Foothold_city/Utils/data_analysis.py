@@ -5,14 +5,18 @@ import pandas as pd
 class DataAnalysis:
 
     @staticmethod
-    def fill_data(data):
+    def fill_data(data, criteria_names):
         """
-            Заполняет NaN значения в списке на основе ближайших левого и правого значений.
-            :param data: Список числовых значений, который может содержать NaN.
-            :return: Список с заполненными значениями вместо NaN.
-            """
+        Заполняет NaN значения в списке на основе ближайших левого и правого значений.
+        :param data: Список числовых значений, который может содержать NaN.
+        :param criteria_names: Список названий критериев (для определения, какие критерии были дополнены).
+        :return: Кортеж из двух элементов:
+            1. Список с заполненными значениями вместо NaN.
+            2. Список названий критериев, которые были дополнены.
+        """
         n = len(data)
         filled_data = data.copy()  # Создаем копию списка для изменения
+        filled_criteria = []  # Список для хранения названий дополненных критериев
 
         for i in range(n):
             if pd.isna(filled_data[i]):  # Проверяем, является ли значение NaN
@@ -52,7 +56,10 @@ class DataAnalysis:
                 elif right_value is not None:
                     filled_data[i] = right_value
 
-        return filled_data
+                # Добавляем название критерия в список дополненных
+                filled_criteria.append(criteria_names[i])
+
+        return filled_data, filled_criteria
 
     @staticmethod
     def calculate_polygon_area(city_data):

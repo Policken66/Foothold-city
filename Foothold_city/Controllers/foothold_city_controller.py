@@ -273,17 +273,29 @@ class FootholdCityController:
                 "Выберите минимум три города для сортировки."
             )
             return
+
         selected_cities = [item.text() for item in selected_items]
         # data_selected_cities = self.normalized_data[self.normalized_data['Город'].isin(selected_cities)]
         cities_values = {}
+        filled_criteria_list = []  # Список для хранения дополненных критериев
+        criteria_names = self.file_manager.get_criteria_names()
+
         for city in selected_cities:
             data = self.file_manager.get_city_normalized_data(city)
-            full_data = DataAnalysis.fill_data(data)
+            full_data, filled_criteria = DataAnalysis.fill_data(data, criteria_names)
+
+            if filled_criteria:
+                filled_criteria_list.append({city: filled_criteria})
+
             value = DataAnalysis.calculate_polygon_area(full_data)
             cities_values[city] = {
                 "full_data": full_data,
                 "value": value
             }
+
+        print("Дополненные критерии:")
+        for entry in filled_criteria_list:
+            print(entry)
 
         # Распределение по действиям
         if selected_option == "Вариант 1":

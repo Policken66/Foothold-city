@@ -7,11 +7,11 @@ class FileManager:
         self.data = None  # Переменная для хранения данных из файла
         self.normalized_data = None
         self.spheres_mapping = {
-                                    "Политическая": [],
-                                    "Экономическая": [],
-                                    "Социальная": [],
-                                    "Духовная": []
-                                }
+            "Политическая": [],
+            "Экономическая": [],
+            "Социальная": [],
+            "Духовная": []
+        }
 
     def get_data(self):
         """Возвращает данные из загруженного файла."""
@@ -103,7 +103,6 @@ class FileManager:
             print("______________sphere_labels_______________")
             print(sphere_labels)
 
-
             for header, sphere in zip(headers, sphere_labels):
                 if sphere in self.spheres_mapping:
                     self.spheres_mapping[sphere].append(header)
@@ -164,3 +163,16 @@ class FileManager:
         else:
             print("Данные не загружены или столбец 'Город' отсутствует.")
             return None
+
+    def get_criteria_names(self):
+        """
+        Возвращает список названий критериев из нормализованных данных.
+        :return: Список названий критериев.
+        """
+        if self.normalized_data is not None and 'Город' in self.normalized_data.columns:
+            # Исключаем столбец "Город" и возвращаем остальные названия столбцов
+            criteria_names = [col.replace('_норм', '') for col in self.normalized_data.columns if col != 'Город']
+            return criteria_names
+        else:
+            print("Нормализованные данные не загружены или столбец 'Город' отсутствует.")
+            return []
