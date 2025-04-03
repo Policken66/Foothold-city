@@ -20,6 +20,7 @@ class VisualizationWidget(QWidget):
         self.plt_size = 13
         self.plot = plt
         self.cities_data = {}  # словарь для хранения данных нескольких городов
+        self.cities_data_not_normalized = {}  # словарь для хранения ненормализованных данных нескольких городов
         #словарь для цветовой палитры
         self.color_palette = color_palette
         self.value_visibility = {}  # словарь для отслеживания видимости значений для каждого города
@@ -65,6 +66,7 @@ class VisualizationWidget(QWidget):
     def add_city_data(self, city_name, city_spheres_data_normalaized, city_spheres_data):
         """добавить или обновить данные для конкретного города"""
         self.cities_data[city_name] = city_spheres_data_normalaized
+        self.cities_data_not_normalized[city_name] = city_spheres_data
         self._spheres = city_spheres_data_normalaized  #сохранить данные посленего добавленного города для отрисовки осей
 
         print("-------------------city_spheres_data_normalaized------------------------")
@@ -108,6 +110,7 @@ class VisualizationWidget(QWidget):
     def clear_cities(self):
         """очистить данные о городах"""
         self.cities_data.clear()
+        self.cities_data_not_normalized.clear()
         self._spheres = None
         # Очищаем список чекбоксов
         self.checkbox_list.clear()
@@ -163,9 +166,11 @@ class VisualizationWidget(QWidget):
         self._draw_axes(sphere_angles)
 
         # рисуем матрицу для каждого города
-        for i, (city_name, city_data) in enumerate(self.cities_data.items()):
+        for i, (city_name, city_data ) in enumerate(self.cities_data.items()):
             color = self.color_palette[i % len(self.color_palette)]
-            self._draw_city_polygon(city_data, sphere_angles, color, city_name)
+            #получаем исходные данные значений для города 
+            city_data_not_norm = self.cities_data_not_normalized[city_name]
+            self._draw_city_polygon(city_data, city_data_not_norm, sphere_angles, color, city_name)
 
         # Скрытие стандартных осей
         for spine in self.ax.spines.values():
@@ -244,11 +249,12 @@ class VisualizationWidget(QWidget):
                     bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='none')
                 )
 
-    def _draw_city_polygon(self, city_data, sphere_angles, color, city_name):
+    def _draw_city_polygon(self, city_data, city_data_not_norm, sphere_angles, color, city_name):
         """рисуем матрицу для конкретного города"""
         points = []
 
-        for sphere, axes in city_data.items():
+        for (sphere, axes), (sphere_not_norm, axes_not_norm) in zip(city_data.items(), city_data_not_norm.items()):
+            
             start_angle, end_angle = sphere_angles[sphere]
             count = len(axes)
             for i, (axis_name, value) in enumerate(axes):
@@ -256,6 +262,10 @@ class VisualizationWidget(QWidget):
                     count -= 1"""
             total_span = end_angle - start_angle
             step = total_span / (count + 1) if count > 1 else total_span / 2
+
+            not_norm_value = []
+            for i, (axis_name, value) in enumerate(axes_not_norm):
+                not_norm_value.append(value)
 
             for i, (axis_name, value) in enumerate(axes):
                 """if math.isnan(value):
@@ -270,20 +280,30 @@ class VisualizationWidget(QWidget):
                 x = (value / max_length) * x_end
                 y = (value / max_length) * y_end
                 points.append((x, y))
+                
+                """координаты"""
 
                 # рисуем точку
                 self.ax.scatter(x, y, color=color, zorder=3)
-                
                 # Показываем значение только если включена видимость для этого города
+                
                 if self.value_visibility.get(city_name, True):
+                    print("value: ", not_norm_value[i], " ")
                     self.ax.text(
-                        x * 1.1, y * 1.1, f"{value}",
+                        x * 1.1, y * 1.1, f"{not_norm_value[i]}",
                         fontsize=14,
                         ha='center',
                         va='center',
                         color = (0/255, 0/255, 0/255) , 
                         alpha=0.3,
                     )
+                
+        for sphere, axes_not_norm in city_data_not_norm.items():            
+            """показываем исходные значения"""
+            for i, (axis_name, value) in enumerate(axes_not_norm):
+                new_value = value
+
+                
 
         # рисуем полигон
         if len(points) >= 3:
