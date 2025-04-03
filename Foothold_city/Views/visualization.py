@@ -288,7 +288,6 @@ class VisualizationWidget(QWidget):
                 # Показываем значение только если включена видимость для этого города
                 
                 if self.value_visibility.get(city_name, True):
-                    print("value: ", not_norm_value[i], " ")
                     self.ax.text(
                         x * 1.1, y * 1.1, f"{not_norm_value[i]}",
                         fontsize=14,
