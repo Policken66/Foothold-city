@@ -41,6 +41,7 @@ class FootholdCityController:
         # Переменные
         self.visualization = None
         self.normalized_data = None
+        self.data = None
         self.popup_window = None  # Добавляем переменную для хранения ссылки на окно
         self.example_data = {
             "Политическая": [("Население", 8), ("Избирательная кампания", 3)],
@@ -65,14 +66,18 @@ class FootholdCityController:
         if file_path:  # Если файл выбран
             self.all_close()
             print(f"Выбран файл: {file_path}")
-            self.file_manager.load_excel(file_path)  # Загружаем данные в модель
+            self.data = self.file_manager.load_excel(file_path)  # Загружаем данные в модель
             cities = self.file_manager.get_city_names()  # Получаем список городов
             print("_________cities_________")
             print(cities)
             # Нормализуем данные
             self.normalized_data = self.file_manager.normalize_data()
+
             print("_________normalized_data_________")
             print(self.normalized_data)
+
+            print("_________data_________")
+            print(self.data)
 
             if cities:
                 self.view.ui.listWidget.clear()  # Очищаем список городов
@@ -129,11 +134,12 @@ class FootholdCityController:
             self.view.ui.graphicsView.scene().addWidget(self.visualization)
 
         # Получаем данные для выбранного города
+        city_spheres_data_normalaized = self.get_city_normalaized_spheres_data(city_name)
         city_spheres_data = self.get_city_spheres_data(city_name)
 
         # Если элемент выбран, добавляем город, если нет - удаляем
         if item.isSelected():
-            self.visualization.add_city_data(city_name, city_spheres_data)
+            self.visualization.add_city_data(city_name, city_spheres_data_normalaized, city_spheres_data)
         else:
             # Удаляем чекбокс города
             self.visualization.remove_city_checkbox(city_name)
@@ -147,7 +153,7 @@ class FootholdCityController:
                 # Если городов не осталось, очищаем график
                 self.visualization.clear_cities()
 
-    def get_city_spheres_data(self, city_name):
+    def get_city_normalaized_spheres_data(self, city_name):
         """
         Возвращает данные для конкретного города в требуемом формате.
 
@@ -176,6 +182,39 @@ class FootholdCityController:
                 if norm_column in city_data.columns:
                     value = city_data[norm_column].values[0]  # Берем значение для города
                     sphere_data.append((criterion, value))
+            city_spheres_data[sphere] = sphere_data
+
+        return city_spheres_data
+
+    def get_city_spheres_data(self, city_name):
+        """
+        Возвращает данные для конкретного города в требуемом формате.
+
+        :param city_name: Название города.
+        :return: Словарь сфер с данными для города.
+        """
+        if self.data is None:
+            print("Нормализованные данные не загружены.")
+            return {}
+
+        # Определение сфер и критериев
+        spheres_mapping = self.file_manager.spheres_mapping
+
+        # Фильтруем данные для указанного города
+        city_data = self.data[self.data['Город'] == city_name]
+        if city_data.empty:
+            print(f"Город '{city_name}' не найден в данных.")
+            return {}
+
+        # Формируем словарь сфер
+        city_spheres_data = {}
+        for sphere, criteria in spheres_mapping.items():
+            sphere_data = []
+            for criterion in criteria:
+                norm_column = f"{criterion}"
+                if norm_column in city_data.columns:
+                    value = city_data[norm_column].values[0]  # Берем значение для города
+                    sphere_data.append((criterion, np.float64(value)))
             city_spheres_data[sphere] = sphere_data
 
         return city_spheres_data

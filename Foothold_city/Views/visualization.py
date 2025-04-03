@@ -62,11 +62,17 @@ class VisualizationWidget(QWidget):
         
         self.setLayout(main_layout)
 
-    def add_city_data(self, city_name, spheres_data):
+    def add_city_data(self, city_name, city_spheres_data_normalaized, city_spheres_data):
         """добавить или обновить данные для конкретного города"""
-        self.cities_data[city_name] = spheres_data
-        self._spheres = spheres_data  #сохранить данные посленего добавленного города для отрисовки осей
-        
+        self.cities_data[city_name] = city_spheres_data_normalaized
+        self._spheres = city_spheres_data_normalaized  #сохранить данные посленего добавленного города для отрисовки осей
+
+        print("-------------------city_spheres_data_normalaized------------------------")
+        print(city_spheres_data_normalaized)
+        print("-------------------city_spheres_data------------------------")
+        print(city_spheres_data)
+
+
         # Создаем виджет для чекбокса
         checkbox_widget = QWidget()
         checkbox_layout = QHBoxLayout(checkbox_widget)
