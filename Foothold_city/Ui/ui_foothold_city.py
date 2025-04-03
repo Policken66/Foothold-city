@@ -12,7 +12,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_FootholdCity(object):
     def setupUi(self, FootholdCity):
         FootholdCity.setObjectName("FootholdCity")
-        FootholdCity.resize(966, 567)
+        FootholdCity.resize(1106, 659)
         self.centralwidget = QtWidgets.QWidget(parent=FootholdCity)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)

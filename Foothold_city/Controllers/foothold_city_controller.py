@@ -300,40 +300,58 @@ class FootholdCityController:
         # Распределение по действиям
         if selected_option == "Вариант 1":
             results = DataAnalysis.sort_variant_1(cities_values)
-            self.show_results(results)
+            self.show_results(results, filled_criteria_list)
         elif selected_option == "Вариант 2":
             results = DataAnalysis.sort_variant_2(cities_values)
-            self.show_results(results)
+            self.show_results(results, filled_criteria_list)
 
-    def show_results(self, result):
+    def show_results(self, result, filled_criteria_list):
         if result is None:
             return
+
         # Формируем HTML-текст для вывода
         output_lines = []
+
+        # Вывод информации о городах
         for entry in result:
             city = entry["Название города"]
             order = entry["Порядок опорного города"]
             value = entry["value"]
-            line = ''
 
-            # Определяем цвет в зависимости от порядка
+            # Определяем цвет и формируем строку в зависимости от порядка
             if order == "Опорный город 1 порядка":
                 color = "darkgreen"  # Темно-зеленый
-                line = f'<span style="color: {color};">{city} : {order}</span>'
+                line = f'<span style="color: {color};">{city} : {order}</span><br>'
             elif order == "Опорный город 2 порядка":
                 color = "goldenrod"  # Темно-желтый/золотой
-                line = f'<span style="color: {color};">{city} : {order} : {value}</span>'
+                line = f'<span style="color: {color};">{city} : {order}</span><br>'
             elif order == "Опорный город 3 порядка":
                 color = "darkorange"  # Темно-оранжевый
-                line = f'<span style="color: {color};">{city} : {order} : {value}</span>'
+                line = f'<span style="color: {color};">{city} : {order}</span><br>'
             elif order == "Опорный город 4 порядка":
                 color = "darkred"  # Темно-красный
-                line = f'<span style="color: {color};">{city}</span>'
+                line = f'<span style="color: {color};">{city}</span><br>'
 
             output_lines.append(line)
 
+        # Добавляем разделитель
+        output_lines.append('<h4><b>Дополненные параметры определенные графически:</h4><br>')
+
+        # Вывод списка дополненных критериев
+        all_filled_criteria = {}
+        for entry in filled_criteria_list:
+            for city, criteria in entry.items():
+                if criteria:
+                    all_filled_criteria[city] = criteria
+
+        if all_filled_criteria:
+            for city, criteria in all_filled_criteria.items():
+                output_lines.append(f'<b>{city}</b>: {", ".join(criteria)}<br>')
+        else:
+            output_lines.append('Нет дополненных параметров.<br>')
+
         # Объединяем строки через <br> для переноса
-        self.output_text = "<br>".join(output_lines)
+        self.output_text = "".join(output_lines)
         self.update_textEdit()
 
     def all_close(self):
