@@ -113,7 +113,7 @@ class FileManager:
 
             # Теперь заполняем data
             # Удаление первых трех строк (служебные строки) и сброс индекса
-            self.data = df.iloc[3:].reset_index(drop=True)
+            self.data = df.iloc[2:].reset_index(drop=True)
 
             # Переименование столбцов на основе второй строки
             self.data.columns = headers
