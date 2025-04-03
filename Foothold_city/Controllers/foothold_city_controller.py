@@ -51,6 +51,8 @@ class FootholdCityController:
         }
         self.output_text = None
 
+        self.city_spheres_data_normalaized = None
+
     def pushButton_open_clicked(self):
         """Обработчик нажатия кнопки 'Open'."""
         print("Button open clicked")
@@ -88,10 +90,10 @@ class FootholdCityController:
         if self.visualization is not None:
             # создаём новый виджет для всплывающего окна
             popup_visualization = VisualizationWidget()
-
+            
             # копируем данные городов в новый виджет
             for city_name, city_data in self.visualization.cities_data.items():
-                popup_visualization.add_city_data(city_name, city_data)
+                popup_visualization.add_city_data(city_name, city_data, city_data)
 
             # создайм новое окно
             self.popup_window = QWidget()  # Сохраняем ссылку на окно
@@ -134,12 +136,12 @@ class FootholdCityController:
             self.view.ui.graphicsView.scene().addWidget(self.visualization)
 
         # Получаем данные для выбранного города
-        city_spheres_data_normalaized = self.get_city_normalaized_spheres_data(city_name)
+        self.city_spheres_data_normalaized = self.get_city_normalaized_spheres_data(city_name)
         city_spheres_data = self.get_city_spheres_data(city_name)
 
         # Если элемент выбран, добавляем город, если нет - удаляем
         if item.isSelected():
-            self.visualization.add_city_data(city_name, city_spheres_data_normalaized, city_spheres_data)
+            self.visualization.add_city_data(city_name, self.city_spheres_data_normalaized, city_spheres_data)
         else:
             # Удаляем чекбокс города
             self.visualization.remove_city_checkbox(city_name)
