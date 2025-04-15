@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QCheckBox, QHBoxLayout, QListWidget, QListWidgetItem, QLabel, QPushButton
 import numpy as np
+import math
 from Foothold_city.Resources.const import *
 
 # Установка глобальных параметров для шрифта Times New Roman
@@ -69,10 +70,10 @@ class VisualizationWidget(QWidget):
         self.cities_data_not_normalized[city_name] = city_spheres_data
         self._spheres = city_spheres_data_normalaized  #сохранить данные посленего добавленного города для отрисовки осей
 
-        print("-------------------city_spheres_data_normalaized------------------------")
-        print(city_spheres_data_normalaized)
-        print("-------------------city_spheres_data------------------------")
-        print(city_spheres_data)
+        #print("-------------------city_spheres_data_normalaized------------------------")
+        #print(city_spheres_data_normalaized)
+        #print("-------------------city_spheres_data------------------------")
+        #print(city_spheres_data)
 
 
         # Создаем виджет для чекбокса
@@ -253,6 +254,9 @@ class VisualizationWidget(QWidget):
         """рисуем матрицу для конкретного города"""
         points = []
 
+        # Reset placed label positions for this city only
+        self._placed_label_positions = []
+
         for (sphere, axes), (sphere_not_norm, axes_not_norm) in zip(city_data.items(), city_data_not_norm.items()):
             
             start_angle, end_angle = sphere_angles[sphere]
@@ -286,17 +290,59 @@ class VisualizationWidget(QWidget):
                 # рисуем точку
                 self.ax.scatter(x, y, color=color, zorder=3)
                 # Показываем значение только если включена видимость для этого города
-                
+
                 if self.value_visibility.get(city_name, True):
-                    self.ax.text(
-                        x * 1.1, y * 1.1, f"{not_norm_value[i]}",
-                        fontsize=14,
-                        ha='center',
-                        va='center',
-                        color = (0/255, 0/255, 0/255) , 
-                        alpha=0.3,
-                    )
-                
+                    # Position label along the axis direction with offset
+                    label_text = f"{not_norm_value[i]}"
+                    shift_amount = 0.1 + 0.05 * len(label_text)
+                    max_attempts = 10
+                    attempts = 0
+
+                    # Calculate rotation angle for label text in degrees
+                    rotation_deg = 0
+                    center_offset = 0
+                    if 0 <= value <= 3:
+                        rotation_deg = np.degrees(angle)
+                        # Adjust rotation for readability
+                        if 90 < rotation_deg < 270:
+                            rotation_deg += 180
+                        center_offset = 3  # Apply offset only for rotated labels
+
+                    label_x = x + shift_amount * np.cos(angle) + center_offset * np.cos(angle)
+                    label_y = y + shift_amount * np.sin(angle) + center_offset * np.sin(angle)
+
+                    def is_too_close(x1, y1, positions, threshold=0.5):
+                        for (px, py) in positions:
+                            if abs(x1 - px) < threshold and abs(y1 - py) < threshold:
+                                return True
+                        return False
+
+                    while is_too_close(label_x, label_y, self._placed_label_positions) and attempts < max_attempts:
+                        label_x += shift_amount * np.cos(angle)
+                        label_y += shift_amount * np.sin(angle)
+                        attempts += 1
+
+                    self._placed_label_positions.append((label_x, label_y))
+
+                    # Calculate rotation angle for label text in degrees
+                    rotation_deg = 0
+                    if 0 <= value <= 3:
+                        rotation_deg = np.degrees(angle)
+                        # Adjust rotation for readability
+                        if 90 < rotation_deg < 270:
+                            rotation_deg += 180
+
+                    if not (math.isnan(not_norm_value[i])):
+                        self.ax.text(
+                            label_x, label_y, f"{not_norm_value[i]}",
+                            fontsize=14,
+                            ha='center',
+                            va='center',
+                            rotation=rotation_deg,
+                            rotation_mode='anchor',
+                            color = (0/255, 0/255, 0/255) , 
+                            alpha=0.3,
+                        )
         for sphere, axes_not_norm in city_data_not_norm.items():            
             """показываем исходные значения"""
             for i, (axis_name, value) in enumerate(axes_not_norm):

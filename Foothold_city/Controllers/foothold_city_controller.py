@@ -55,7 +55,6 @@ class FootholdCityController:
 
     def pushButton_open_clicked(self):
         """Обработчик нажатия кнопки 'Open'."""
-        print("Button open clicked")
 
         # Открываем диалог выбора файла
         file_path, _ = QFileDialog.getOpenFileName(
@@ -67,33 +66,26 @@ class FootholdCityController:
 
         if file_path:  # Если файл выбран
             self.all_close()
-            print(f"Выбран файл: {file_path}")
             self.data = self.file_manager.load_excel(file_path)  # Загружаем данные в модель
             cities = self.file_manager.get_city_names()  # Получаем список городов
-            print("_________cities_________")
-            print(cities)
             # Нормализуем данные
             self.normalized_data = self.file_manager.normalize_data()
 
-            print("_________normalized_data_________")
-            print(self.normalized_data)
-
-            print("_________data_________")
-            print(self.data)
 
             if cities:
                 self.view.ui.listWidget.clear()  # Очищаем список городов
                 self.view.ui.listWidget.addItems(cities)  # Добавляем города в список
 
     def pushButton_open_plot_clicked(self):
-        print("Button open plot clicked")
         if self.visualization is not None:
             # создаём новый виджет для всплывающего окна
             popup_visualization = VisualizationWidget()
             
             # копируем данные городов в новый виджет
-            for city_name, city_data in self.visualization.cities_data.items():
-                popup_visualization.add_city_data(city_name, city_data, city_data)
+            for city_name in self.visualization.cities_data:
+                normalized_data = self.visualization.cities_data[city_name]
+                original_data = self.visualization.cities_data_not_normalized.get(city_name, normalized_data)
+                popup_visualization.add_city_data(city_name, normalized_data, original_data)
 
             # создайм новое окно
             self.popup_window = QWidget()  # Сохраняем ссылку на окно
