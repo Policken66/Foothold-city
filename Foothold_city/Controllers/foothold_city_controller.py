@@ -74,6 +74,8 @@ class FootholdCityController:
 
             if cities:
                 self.view.ui.listWidget.clear()  # Очищаем список городов
+                # Удаляем последний элемент из списка cities
+                cities.pop()  # Удаляет последний элемент
                 self.view.ui.listWidget.addItems(cities)  # Добавляем города в список
 
     def pushButton_open_plot_clicked(self):
