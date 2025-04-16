@@ -274,6 +274,9 @@ class VisualizationWidget(QWidget):
             for i, (axis_name, value) in enumerate(axes):
                 """if math.isnan(value):
                     continue"""
+                
+                if math.isnan(value):
+                    value = 0
 
                 angle = start_angle + step * (i + 1)
                 max_length = 10
@@ -350,18 +353,18 @@ class VisualizationWidget(QWidget):
 
                 
 
-        # рисуем полигон
         if len(points) >= 3:
             points = np.array(points)
-            sorted_indices = np.argsort(np.arctan2(points[:, 1], points[:, 0]))
-            points = points[sorted_indices]
+            
+            # Разделяем координаты X и Y
             X, Y = points[:, 0], points[:, 1]
-
+            
             if (fill_polygon == True ):
                 self.ax.fill(X, Y, color=color, alpha=0.3, label=city_name)
-                
-            self.ax.plot(np.append(X, X[0]), np.append(Y, Y[0]), color=color, linewidth=2, label=city_name)
 
+            # Рисуем полигон, замыкая его (добавляя первую точку в конец)
+            self.ax.plot(np.append(X, X[0]), np.append(Y, Y[0]), color=color, linewidth=2, label=city_name)
+            
         # добавление легенды
         legend = self.ax.legend(loc='upper left', bbox_to_anchor=(1.14, 1.0), borderaxespad=0.5, labelcolor='#0000004d')
         

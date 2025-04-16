@@ -139,6 +139,14 @@ class FileManager:
             # Перестраиваем DataFrame в соответствии с новым порядком столбцов
             self.data = self.data[sorted_columns]
 
+            """# Добавление строки с нулями в конец DataFrame
+            zero_row = pd.DataFrame([[0] * len(self.data.columns)], columns=self.data.columns)
+            self.data = pd.concat([self.data, zero_row], ignore_index=True)"""
+            # Создаем новую строку
+            new_row = ["Г0"] + [0] * (len(self.data.columns) - 1)
+            # Добавляем строку в DataFrame
+            self.data.loc[len(self.data)] = new_row
+
             print("______________data_______________")
             print(self.data)
             return self.data
