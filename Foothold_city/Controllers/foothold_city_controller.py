@@ -268,6 +268,7 @@ class FootholdCityController:
             )
             return
 
+        self.file_manager.print_criterion_data("Качество городской среды")
         selected_cities = [item.text() for item in selected_items]
         # data_selected_cities = self.normalized_data[self.normalized_data['Город'].isin(selected_cities)]
         cities_values = {}

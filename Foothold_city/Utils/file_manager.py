@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 
@@ -117,6 +118,27 @@ class FileManager:
             # Переименование столбцов на основе второй строки
             self.data.columns = headers
 
+            # Переименование первого столбца в "Город"
+            if len(self.data.columns) > 0:
+                self.data.rename(columns={self.data.columns[0]: "Город"}, inplace=True)
+
+            # Сортировка столбцов по порядку: политическая → экономическая → социальная → духовная
+            sorted_columns = ["Город"]  # Первый столбец всегда "Город"
+
+            # Определяем порядок сфер
+            sphere_order = ["Политическая", "Экономическая", "Социальная", "Духовная"]
+
+            # Добавляем столбцы в соответствии с порядком сфер
+            for sphere in sphere_order:
+                if sphere in self.spheres_mapping:
+                    sorted_columns.extend(self.spheres_mapping[sphere])
+
+            # Фильтруем только те столбцы, которые существуют в данных
+            sorted_columns = [col for col in sorted_columns if col in self.data.columns]
+
+            # Перестраиваем DataFrame в соответствии с новым порядком столбцов
+            self.data = self.data[sorted_columns]
+
             print("______________data_______________")
             print(self.data)
             return self.data
@@ -143,18 +165,26 @@ class FileManager:
             # Проходим по всем числовым столбцам, кроме "Город"
             for column in normalized_data.columns:
                 if column != 'Город' and pd.api.types.is_numeric_dtype(normalized_data[column]):
-                    # Удаляем NaN значения для текущего столбца
+                    # Удаляем NaN значения для вычисления min и max
                     valid_data = normalized_data[column].dropna()
 
-                    min_val = valid_data.min()
-                    max_val = valid_data.max()
+                    if not valid_data.empty:
+                        min_val = valid_data.min()
+                        max_val = valid_data.max()
 
-                    if max_val > min_val:  # Избегаем деления на ноль
-                        normalized_data[f"{column}_норм"] = (
-                                ((normalized_data[column] - min_val) / (max_val - min_val)) * 10
-                        ).round(2)
+                        if max_val > min_val:  # Избегаем деления на ноль
+                            # Выполняем нормализацию только для числовых значений
+                            normalized_data[f"{column}_норм"] = normalized_data[column].apply(
+                                lambda x: ((x - min_val) / (max_val - min_val)) * 10 if pd.notnull(x) else np.nan
+                            ).round(2)
+                        else:
+                            # Если все значения одинаковы, оставляем NaN или исходное значение
+                            normalized_data[f"{column}_норм"] = normalized_data[column].apply(
+                                lambda x: np.nan if pd.isnull(x) else 0
+                            )
                     else:
-                        normalized_data[f"{column}_норм"] = 0  # Если все значения одинаковы
+                        # Если все значения NaN, оставляем столбец как NaN
+                        normalized_data[f"{column}_норм"] = np.nan
 
             # Возвращаем только столбцы с нормализованными данными
             normalized_columns = [col for col in normalized_data.columns if col.endswith('_норм')]
@@ -176,3 +206,20 @@ class FileManager:
         else:
             print("Нормализованные данные не загружены или столбец 'Город' отсутствует.")
             return []
+
+    def print_criterion_data(self, criterion_name):
+        """
+        Выводит в консоль данные для указанного критерия.
+
+        :param criterion_name: Название критерия (например, "Качество городской среды").
+        """
+        if self.data is None:
+            print("Данные не загружены.")
+            return
+
+        # Проверяем, есть ли критерий в заголовках DataFrame
+        if criterion_name in self.data.columns:
+            print(f"Данные для критерия '{criterion_name}':")
+            print(self.data[['Город', criterion_name]])
+        else:
+            print(f"Критерий '{criterion_name}' не найден в данных.")
